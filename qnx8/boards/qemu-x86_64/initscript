@@ -1,0 +1,82 @@
+SYSNAME=nto
+TERM=xterm
+ENV=/etc/profile
+
+procmgr_symlink ../../proc/boot/ldqnx-64.so.2 /usr/lib/ldqnx-64.so.2
+
+## Needed for ksh to run the echo command below
+pipe
+
+display_msg " "
+ksh -c "echo Welcome to QNX $(uname -r) on $(uname -m) !"
+display_msg " "
+
+############################################################################################
+display_msg "---> Starting slogger2"
+############################################################################################
+/bin/slogger2 &
+waitfor /dev/slog2
+
+dumper
+mqueue
+
+############################################################################################
+## PCI Server
+############################################################################################
+PCI_DEBUG_MODULE=/lib/dll/pci/pci_debug2.so
+PCI_SLOG_MODULE=/lib/dll/pci/pci_slog2.so
+PCI_BKWD_COMPAT_MODULE=/lib/dll/pci/pci_bkwd_compat.so
+PCI_HW_MODULE=/lib/dll/pci/pci_hw-Intel_x86.so
+
+display_msg "---> Starting PCI server"
+pci-server --aspace-enable
+waitfor /dev/pci
+
+############################################################################################
+## RTC utility / random
+############################################################################################
+display_msg "---> Starting RTC+random"
+rtc hw
+# no idea why, but need to start random in a ksh shell...
+ksh -c "random -l /lib/dll/devr-virtio.so"
+
+#######################################################################
+## Console SERIAL driver
+#######################################################################
+display_msg "---> Starting serial driver"
+devc-ser8250 -e -b115200 
+waitfor /dev/ser1
+reopen /dev/ser1
+
+/sbin/devc-pty
+
+#######################################################################
+# Initial block device setup
+#######################################################################
+/bin/sh /proc/boot/blk-start.sh
+
+#######################################################################
+# Mount file systems
+#######################################################################
+/bin/sh /proc/boot/mount-fs.sh
+
+#######################################################################
+# Start networking, set hostname
+#######################################################################
+/bin/sh /proc/boot/net-start.sh
+
+#######################################################################
+# Starting remaining services startup script
+#######################################################################
+/bin/sh /proc/boot/misc-services.sh
+
+#######################################################################
+# Starting consoles and shells
+#######################################################################
+display_msg "---> Starting shell ... Have fun :-)"
+HOME=/root
+umask 022
+
+# replace this shell with an interactive one
+[+session] /bin/ksh -l
+

@@ -1,0 +1,73 @@
+
+[uid=0 gid=0 perms=0755]
+
+[type=link] /dev/console=/dev/ser1
+
+
+################################################################################################
+## PCI driver HW Modules and configuration file
+################################################################################################
+/lib/dll/pci/pci_hw-AMD_x86.so=pci/pci_hw-AMD_x86.so
+/lib/dll/pci/pci_hw-Intel_x86.so=pci/pci_hw-Intel_x86.so
+
+
+################################################################################################
+## Serial drivers
+################################################################################################
+/sbin/devc-ser8250=devc-ser8250
+/sbin/devc-serusb=devc-serusb
+/sbin/devc-serpci=devc-serpci
+
+
+################################################################################################
+## Block drivers
+################################################################################################
+/sbin/devb-eide=devb-eide
+/sbin/devb-nvme=devb-nvme
+/sbin/devb-ram=devb-ram
+/sbin/devb-virtio=devb-virtio
+/sbin/devb-loopback=devb-loopback
+
+
+################################################################################################
+## Network driver files
+################################################################################################
+/lib/dll/devs-vtnet_pci.so=devs-vtnet_pci.so
+/lib/dll/mods-pci.so=mods-pci.so
+/lib/dll/mods-usb.so=mods-usb.so
+
+################################################################################################
+## random driver files
+################################################################################################
+/lib/dll/devr-virtio.so=devr-virtio.so
+
+################################################################################################
+## RTC driver
+################################################################################################
+/sbin/rtc=rtc
+
+################################################################################################
+## ENV profile
+################################################################################################
+[uid=0 gid=0 perms=0444] /etc/profile = {
+export HOME=/
+export SYSNAME=nto
+export TERM=xterm
+export PATH=/proc/boot:/sbin:/bin:/usr/bin:/usr/sbin:/usr/libexec
+export LD_LIBRARY_PATH=/proc/boot:/lib:/usr/lib:/lib/dll:/lib/dll/pci
+
+export PCI_HW_MODULE=/lib/dll/pci/pci_hw-Intel_x86.so
+export PCI_DEBUG_MODULE=/lib/dll/pci/pci_debug2.so
+export PCI_SLOG_MODULE=/lib/dll/pci/pci_slog2.so
+export PCI_BKWD_COMPAT_MODULE=/lib/dll/pci/pci_bkwd_compat.so
+umask 022
+}
+
+
+################################################################################################
+## startup scripts
+################################################################################################
+net-start.sh = qnx8/boards/qemu-x86_64/net-start.sh
+blk-start.sh = qnx8/boards/qemu-x86_64/blk-start.sh
+mount-fs.sh = qnx8/boards/qemu-x86_64/mount-fs.sh
+misc-services.sh = qnx8/boards/qemu-x86_64/misc-services.sh

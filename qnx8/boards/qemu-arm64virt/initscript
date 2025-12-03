@@ -1,0 +1,64 @@
+SYSNAME=nto
+TERM=xterm
+ENV=/etc/profile
+
+procmgr_symlink ../../proc/boot/ldqnx-64.so.2 /usr/lib/ldqnx-64.so.2
+
+## Needed for ksh to run the echo command below
+pipe
+
+display_msg " "
+ksh -c "echo Welcome to QNX $(uname -r) on $(uname -m) !"
+display_msg " "
+
+############################################################################################
+display_msg "---> Starting slogger2"
+############################################################################################
+/bin/slogger2 &
+waitfor /dev/slog2
+
+dumper
+mqueue
+random 
+
+
+#######################################################################
+## Console SERIAL driver
+#######################################################################
+display_msg "---> Starting serial driver"
+devc-serpl011 -e -F 0x9000000,33
+waitfor /dev/ser1
+reopen /dev/ser1
+
+/sbin/devc-pty
+
+#######################################################################
+# Initial block device setup
+#######################################################################
+/bin/sh /proc/boot/blk-start.sh
+
+#######################################################################
+# Mount file systems
+#######################################################################
+/bin/sh /proc/boot/mount-fs.sh
+
+#######################################################################
+# Start networking, set hostname
+#######################################################################
+/bin/sh /proc/boot/net-start.sh
+
+#######################################################################
+# Starting remaining services startup script
+#######################################################################
+/bin/sh /proc/boot/misc-services.sh
+
+#######################################################################
+# Starting consoles and shells
+#######################################################################
+display_msg "---> Starting shell ... Have fun :-)"
+HOME=/root
+umask 022
+
+# replace this shell with an interactive one
+[+session] /bin/ksh -l
+

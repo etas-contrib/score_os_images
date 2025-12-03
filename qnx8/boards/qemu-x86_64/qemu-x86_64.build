@@ -1,0 +1,25 @@
+################################################################################################
+##
+## Build file for a QNX operating system on a QEMU x86_64 machine
+##
+################################################################################################
+
+[-optional]
+[+keeplinked]
+[image=0x2000000]
+[virtual=x86_64,multiboot] boot = {
+	startup-x86 -v -D8250..115200 
+	PATH=/sbin:/usr/sbin:/bin:/usr/bin:/proc/boot LD_LIBRARY_PATH=/proc/boot:/lib:/usr/lib:/lib/dll/pci procnto-smp-instr -v -mL -bl
+}
+
+# all owned by root
+[uid=0 gid=0 perms=0555 dperms=0555]
+
+[+script] startup-script = qnx8/boards/qemu-x86_64/initscript
+
+# include the target specific build file
+[+include] qnx8/boards/qemu-x86_64/target.build
+
+# include the common build file
+[+include] qnx8/boards/common/common.build
+

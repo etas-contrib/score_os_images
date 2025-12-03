@@ -15,6 +15,26 @@ module(
     version = "1.0",
 )
 
+# ------------------------------------------------------------------------------
+# QNX toolchain
+bazel_dep(name = "score_toolchains_qnx", version = "0.0.4")
+
+toolchains_qnx = use_extension("@score_toolchains_qnx//:extensions.bzl", "toolchains_qnx", dev_dependency=True)
+toolchains_qnx.sdp(
+    url = "file:///home/gjt2abt/qnx803.tgz",
+    sha256 = "8c62b8567727d2e402165eba5a3b29c56ad74165575412a07981b176cdadcaa2",
+)
+
+use_repo(toolchains_qnx, "toolchains_qnx_sdp", "toolchains_qnx_ifs")
+
+register_toolchains("@toolchains_qnx_ifs//:ifs_x86_64", dev_dependency=True)
+# mkifs is independent of target platform, so we just need _one_ toolchain.
+#register_toolchains("@toolchains_qnx_ifs//:ifs_aarch64")
+
+
+# ------------------------------------------------------------------------------
+# General purpose Bazel extensions
+
 # Compliance and licensing toolchain
 bazel_dep(name = "score_dash_license_checker", version = "0.1.2")
 bazel_dep(name = "score_cr_checker", version = "0.2.2")

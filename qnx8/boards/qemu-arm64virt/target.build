@@ -1,0 +1,52 @@
+
+[uid=0 gid=0 perms=0755]
+
+[type=link] /dev/console=/dev/ser1
+
+
+################################################################################################
+## Serial drivers
+################################################################################################
+/sbin/devc-serpl011=devc-serpl011
+
+
+################################################################################################
+## Block drivers
+################################################################################################
+/sbin/devb-virtio=devb-virtio
+/sbin/devb-loopback=devb-loopback
+
+
+################################################################################################
+## Network driver files
+################################################################################################
+/lib/dll/devs-vtnet_mmio.so=devs-vtnet_mmio.so
+/lib/dll/mods-fdt.so=mods-fdt.so
+/lib/dll/mods-phy_fdt.so=mods-phy_fdt.so
+
+
+################################################################################################
+## ENV profile
+################################################################################################
+[uid=0 gid=0 perms=0444] /etc/profile = {
+export HOME=/
+export SYSNAME=nto
+export TERM=xterm
+export PATH=/proc/boot:/sbin:/bin:/usr/bin:/usr/sbin:/usr/libexec
+export LD_LIBRARY_PATH=/proc/boot:/lib:/usr/lib:/lib/dll:/lib/dll/pci
+
+export PCI_HW_MODULE=/lib/dll/pci/pci_hw-bcm2711-rpi4.so
+export PCI_DEBUG_MODULE=/lib/dll/pci/pci_debug2.so
+export PCI_SLOG_MODULE=/lib/dll/pci/pci_slog2.so
+export PCI_BKWD_COMPAT_MODULE=/lib/dll/pci/pci_bkwd_compat.so
+umask 022
+}
+
+
+################################################################################################
+## startup scripts
+################################################################################################
+net-start.sh = qnx8/boards/qemu-arm64virt/net-start.sh
+blk-start.sh = qnx8/boards/qemu-arm64virt/blk-start.sh
+mount-fs.sh = qnx8/boards/qemu-arm64virt/mount-fs.sh
+misc-services.sh = qnx8/boards/qemu-arm64virt/misc-services.sh
