@@ -20,9 +20,12 @@ module(
 bazel_dep(name = "score_toolchains_qnx", version = "0.0.4")
 
 toolchains_qnx = use_extension("@score_toolchains_qnx//:extensions.bzl", "toolchains_qnx", dev_dependency=True)
+# TODO: Add here your QNX8 toolchain which meets the requirements listed in qnx8/README.md
 toolchains_qnx.sdp(
-    url = "file:///home/gjt2abt/qnx803.tgz",
-    sha256 = "8c62b8567727d2e402165eba5a3b29c56ad74165575412a07981b176cdadcaa2",
+    url = "http://link/to/qnx803.tar.gz",
+    # or:
+    # url = "file:///path/to/qnx803.tar.gz",
+    sha256 = "<sha256-sum>",
 )
 
 use_repo(toolchains_qnx, "toolchains_qnx_sdp", "toolchains_qnx_ifs")
