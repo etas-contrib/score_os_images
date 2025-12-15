@@ -135,10 +135,10 @@ The generated QEMU launch script `run-qemu.sh` attaches a virtual disk `disk-sco
 When starting up the QEMU VM with an empty virtual QEMU disk, no partitions are there. With the following commands you can create a partition and a qnx6fs file system which then gets mounted automatically on following boots:
 
 ```bash
-# initialize with GUID partition table
+# initialize /dev/hd0 with GUID partition table
 pted /dev/hd0 init -g
-# Create a partition with 99% disk size and name 'scorefs'
-pted /dev/hd0 add -t qnx6fs -p 99 -n scorefs
+# Create a qnx6fs partition with 99% disk size and name 'scorefs'
+pted /dev/hd0 add -t qnx6 -p 99 -n scorefs
 # Re-read the partition table
 mount -e /dev/hd0
 # Create QNX6 file system
