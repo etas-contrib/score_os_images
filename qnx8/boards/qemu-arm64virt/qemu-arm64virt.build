@@ -15,6 +15,9 @@
 # all owned by root
 [uid=0 gid=0 perms=0555 dperms=0555]
 
+# add external search path in case we are building the image with bazel in context of another module *sigh*
+[search=${MKIFS_PATH}:external/os_images+]
+
 [+script] startup-script = qnx8/boards/qemu-arm64virt/initscript
 
 # include the target specific build file
