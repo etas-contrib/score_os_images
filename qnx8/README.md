@@ -100,12 +100,18 @@ bazel-out/k8-fastbuild/bin/qnx8/boards/qemu-arm64virt/ifs-qemu-arm64virt.bin
 bazel-out/k8-fastbuild/bin/qnx8/boards/qemu-x86_64/run-qemu.sh
 bazel-out/k8-fastbuild/bin/qnx8/boards/qemu-x86_64/ifs-qemu-x86_64.bin
 ```
+#### Run the images with bazel
 
-In order to run the image, change into the directory with the IFS and execute the run script:
+QEMU arm64virt image:
 
 ```
-cd bazel-out/k8-fastbuild/bin/qnx8/boards/qemu-arm64virt
-./run-qemu.sh
+bazel run //qnx8/boards/qemu-arm64-virt:run 
+```
+
+QEMU x86_64 image:
+
+```
+bazel run //qnx8/boards/qemu-x86_64:run 
 ```
 
 You'll get something like:
@@ -127,6 +133,15 @@ No root file system has been detected
 ---> Starting sshd
 ---> Starting shell ... Have fun :-)
 #
+```
+
+#### Run the images manually
+
+In order to run the image, change into the directory with the IFS and execute the run script:
+
+```
+cd bazel-out/k8-fastbuild/bin/qnx8/boards/qemu-arm64virt
+./run-qemu.sh
 ```
 
 ### ssh from host into QEMU image

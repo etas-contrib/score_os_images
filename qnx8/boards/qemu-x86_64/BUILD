@@ -22,3 +22,10 @@ genrule(
     """,
     visibility = ["//visibility:public"],
 )
+
+sh_binary(
+    name = "run",
+    srcs = ["run-qemu.sh"],
+    data = [":ifs-qemu-x86_64"],
+    args = ["$(location :ifs-qemu-x86_64)"],
+)
