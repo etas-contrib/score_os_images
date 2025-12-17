@@ -69,6 +69,21 @@ In case of requiring an online QNX license checkout for the QNX SDP `mkifs` util
 bazel build --action_env=QNXLM_LICENSE_FILE=my@internal.qnx-license-server.com //qnx8/boards/qemu-arm64virt:all
 ```
 
+## Building QNX OS images from external module
+
+Add a reference to this module to your `MODULE.bazel`:
+
+```
+bazel_dep(name = "os_images", version = "...")
+```
+
+Build it with the `@os_images//` prefix, the rest is identical like in the section above:
+
+```bash
+bazel build @os_images//qnx8/boards/qemu-...
+```
+
+
 ## Running the images
 
 ### Pre-requisites
