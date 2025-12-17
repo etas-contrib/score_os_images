@@ -14,5 +14,5 @@ common --incompatible_strict_action_env
 # mkifs is not a target platform specific tool, the host would be sufficient. But there is only
 # target platform specific toolchains defined for QNX in this repo.
 # Therefore we have to select a target platform and we choose x86_64-qnx.
-common --platforms=@score_toolchains_qnx//platforms:x86_64-qnx
+common --platforms=@score_bazel_platforms//:x86_64-qnx8_0
 common --sandbox_writable_path=/var/tmp

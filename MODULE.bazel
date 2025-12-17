@@ -17,7 +17,7 @@ module(
 
 # ------------------------------------------------------------------------------
 # QNX toolchain
-bazel_dep(name = "score_toolchains_qnx", version = "0.0.4")
+bazel_dep(name = "score_toolchains_qnx", version = "0.0.6")
 
 toolchains_qnx = use_extension("@score_toolchains_qnx//:extensions.bzl", "toolchains_qnx", dev_dependency=True)
 # TODO: Add here your QNX8 toolchain which meets the requirements listed in qnx8/README.md
@@ -51,3 +51,5 @@ bazel_dep(name = "buildifier_prebuilt", version = "7.3.1")
 
 # Documentation tools
 bazel_dep(name = "score_docs_as_code", version = "0.2.4")
+
+bazel_dep(name = "score_bazel_platforms", version = "0.0.3")
