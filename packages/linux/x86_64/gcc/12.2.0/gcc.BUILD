@@ -21,6 +21,25 @@ filegroup(
 )
 
 filegroup(
+    name = "empty",
+)
+
+alias(
+    name = "host_dir",
+    actual = ":empty",
+)
+
+alias(
+    name = "target_dir",
+    actual = ":empty",
+)
+
+alias(
+    name = "cxx_builtin_include_directories",
+    actual = ":empty",
+)
+
+filegroup(
     name = "bin",
     srcs = ["bin"],
 )

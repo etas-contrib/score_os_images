@@ -23,7 +23,7 @@ load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl",
     "tool_path",
     "with_feature_set",
 )
-load("@score_bazel_cpp_toolchains//configurations/gcc:flags.bzl",
+load(":flags.bzl",
     "UNFILTERED_COMPILE_FLAGS",
     "DEFAULT_COMPILE_FLAGS",
     "DEFAULT_x86_64_COMPILE_FLAGS",
@@ -374,20 +374,24 @@ def _impl(ctx):
     cxx_builtin_include_directories = []
     tool_paths = []
 
+    sysroot = None
+    if ctx.attr.sysroot != None:
+        sysroot = ctx.attr.sysroot[DefaultInfo].files.to_list()[0].path
+
     return cc_common.create_cc_toolchain_config_info(
         ctx = ctx,
-        abi_version = "gcc-%{tc_version}",
+        abi_version = "%{tc_abi_version}",
         abi_libc_version = "unknown",
-        builtin_sysroot = ctx.file.sysroot.path,
+        builtin_sysroot = sysroot,
         compiler = "gcc",
         cxx_builtin_include_directories = cxx_builtin_include_directories,
         features =  features,
         action_configs = action_configs,
         host_system_name = "local",
-        target_system_name = "%s-linux" % (ctx.attr.target_cpu),
+        target_system_name = "%{tc_cpu}-%{tc_os}",
         target_cpu =  ctx.attr.target_cpu,
         target_libc = "unknown",
-        toolchain_identifier = "gcc-%{tc_version}",
+        toolchain_identifier = "%{tc_identifier}",
         tool_paths = tool_paths,
     )
 
@@ -400,7 +404,11 @@ cc_toolchain_config = rule(
         "cxx_binary": attr.label(allow_single_file = True, executable = True, cfg = "exec", mandatory = True),
         "gcov_binary": attr.label(allow_single_file = True, executable = True, cfg = "exec", mandatory = True),
         "target_cpu": attr.string(mandatory = True),
+        "target_os": attr.string(mandatory = True),
         "strip_binary": attr.label(allow_single_file = True, executable = True, cfg = "exec", mandatory = True),
-        "sysroot": attr.label(allow_single_file = True, mandatory = True),
+        "sysroot": attr.label(default = None),
+        "host_dir": attr.label(default = None),
+        "target_dir": attr.label(default = None),
+        "cxx_builtin_include_directories": attr.label(default = None),
     },
 )

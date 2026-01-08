@@ -14,7 +14,7 @@
 """ Module rule for defining GCC toolchains in Bazel.
 """
 
-load("@score_bazel_cpp_toolchains//bazel/rules:common.bzl", "get_flag_groups")
+load("@score_bazel_cpp_toolchains//rules:common.bzl", "get_flag_groups")
 
 def _impl(rctx):
     """ Implementation of the gcc_toolchain repository rule.
@@ -22,25 +22,20 @@ def _impl(rctx):
     Args:
         rctx: The repository context.
     """
+    tc_identifier = "gcc_{}".format(rctx.attr.gcc_version)
+    if rctx.attr.tc_os == "qnx":
+        tc_identifier = "sdp_{}".format(rctx.attr.sdp_version)
 
     rctx.template(
         "BUILD",
-        rctx.attr._cc_toolchain_common_build,
-        {
-            "%{tc_pkg_repo}": rctx.attr.tc_pkg_repo,
-            "%{tc_cpu}": rctx.attr.tc_cpu,
-            "%{tc_family}": "gcc",
-            "%{tc_os}": rctx.attr.tc_os,
-            "%{tc_version}": rctx.attr.gcc_version,
-        },
-    )
-
-    rctx.template(
-        "gcc/BUILD",
         rctx.attr._cc_toolchain_gcc_build,
         {
             "%{tc_pkg_repo}": rctx.attr.tc_pkg_repo,
             "%{tc_cpu}": rctx.attr.tc_cpu,
+            "%{tc_os}": rctx.attr.tc_os,
+            "%{tc_version}": rctx.attr.gcc_version,
+            "%{tc_identifier}": tc_identifier, 
+            "%{tc_runtime_es}": rctx.attr.tc_runtime_ecosystem,
         },
     )
 
@@ -48,15 +43,23 @@ def _impl(rctx):
     extra_link_flags = get_flag_groups(rctx.attr.extra_link_flags)
 
     rctx.template(
-        "gcc/cc_toolchain_config.bzl",
+        "cc_toolchain_config.bzl",
         rctx.attr._cc_toolchain_config,
         {
             "%{tc_version}": rctx.attr.gcc_version,
+            "%{tc_identifier}": "gcc",
+            "%{tc_runtime_es}": rctx.attr.tc_runtime_ecosystem,
             "%{extra_compile_flags_switch}": "True" if len(rctx.attr.extra_compile_flags) else "False",
             "%{extra_compile_flags}":extra_compile_flags,
             "%{extra_link_flags_switch}": "True" if len(rctx.attr.extra_link_flags) else "False",
             "%{extra_link_flags}": extra_link_flags,
         },
+    )
+
+    rctx.template(
+        "flags.bzl",
+        rctx.attr._cc_toolchain_flags,
+        {},
     )
 
 gcc_toolchain = repository_rule(
@@ -68,16 +71,22 @@ gcc_toolchain = repository_rule(
         "gcc_version": attr.string(doc="GCC version number"),
         "extra_compile_flags": attr.string_list(doc="Extra/Additional compile flags."),
         "extra_link_flags": attr.string_list(doc="Extra/Additional link flags."),
+        "sdp_version": attr.string(doc="SDP version number"),
+        "license_path": attr.string(doc="Lincese path"),
+        "license_info_variable": attr.string(doc="License info variable name (custom settings)"),
+        "license_info_value": attr.string(doc="License info value (custom settings)"),
+        "tc_runtime_ecosystem": attr.string(doc="Runtime ecosystem."),
+        "tc_system_toolchain": attr.bool(doc="Boolean flag to state if this is a system toolchain"),
         "_cc_toolchain_config": attr.label(
-            default = "@score_bazel_cpp_toolchains//templates/gcc:cc_toolchain_config.bzl.template",
+            default = "@score_bazel_cpp_toolchains//templates:cc_toolchain_config.bzl.template",
             doc = "Path to the cc_config.bzl template file.",
         ),
-        "_cc_toolchain_common_build": attr.label(
-            default = "@score_bazel_cpp_toolchains//templates/common:BUILD.template",
+        "_cc_toolchain_gcc_build": attr.label(
+            default = "@score_bazel_cpp_toolchains//templates:BUILD.template",
             doc = "Path to the Bazel BUILD file template for the toolchain.",
         ),
-        "_cc_toolchain_gcc_build": attr.label(
-            default = "@score_bazel_cpp_toolchains//templates/gcc:BUILD.template",
+        "_cc_toolchain_flags": attr.label(
+            default = "@score_bazel_cpp_toolchains//templates:flags.bzl.template",
             doc = "Path to the Bazel BUILD file template for the toolchain.",
         ),
     },
