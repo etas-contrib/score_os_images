@@ -29,7 +29,7 @@ bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "score_bazel_platforms", version = "0.0.3")
 local_path_override(
     module_name = "score_bazel_platforms",
-    path = "../../playground/platforms/",
+    path = "../../bazel_platforms/",
 )
 
 # *******************************************************************************
@@ -61,17 +61,7 @@ local_path_override(
 gcc = use_extension("@score_bazel_cpp_toolchains//extentions:gcc.bzl", "gcc")
 
 # *******************************************************************************
-# Setting local host GCC (CPU:x86_64|OS:Linux|V:unknown|ES:host)
-# *******************************************************************************
-# gcc.toolchain(
-#     name = "score_system_toolchain",
-#     target_cpu = "x86_64",
-#     target_os = "linux",
-#     use_system_toolchain = True,
-# )
-
-# *******************************************************************************
-# Setting default GCC (CPU:x86_64|OS:Linux|V:12.2.0|ES:generic)
+# Setting default GCC (CPU:x86_64|OS:Linux|V:12.2.0|ES:posix)
 # *******************************************************************************
 gcc.toolchain(
     target_cpu = "x86_64",
@@ -81,19 +71,7 @@ gcc.toolchain(
 ) 
 
 # *******************************************************************************
-# Setting AutoSD GCC (CPU:x86_64|OS:Linux|V:unknown|ES:autosd)
-# *******************************************************************************
-# gcc.toolchain(
-#     name = "score_autosd_9_toolchain",
-#     target_cpu = "x86_64",
-#     target_os = "linux",
-#     runtime_ecosystem = "autosd",
-#     version = "9",
-#     use_system_toolchain = True,
-# ) 
-
-# *******************************************************************************
-# Setting custom GCC (CPU:x86_64|OS:Linux|V:12.2.0|ES:generic)
+# Setting custom GCC (CPU:x86_64|OS:Linux|V:12.2.0|ES:posix)
 # *******************************************************************************
 gcc.sdp(
     name = "my_toolchain_pkg",
@@ -121,19 +99,45 @@ gcc.toolchain(
     target_cpu = "x86_64",
     target_os = "qnx",
     sdp_version = "8.0.0",
+    version = "12.2.0",
+    license_path = "/opt/score_qnx/license/licenses",
     use_default_package = True,
 )
 
 # *******************************************************************************
 # Setting GCC (CPU:arm64|OS:QNX|version(sdp):8.0)
 # *******************************************************************************
+gcc.toolchain(
+    name = "score_qcc_arm_toolchain",
+    target_cpu = "arm64",
+    target_os = "qnx",
+    sdp_version = "8.0.0",
+    version = "12.2.0",
+    license_path = "/opt/score_qnx/license/licenses",
+    use_default_package = True,
+)
+
+# *******************************************************************************
+# Setting local host GCC (CPU:x86_64|OS:Linux|V:unknown|ES:host)
+# *******************************************************************************
 # gcc.toolchain(
-#     name = "score_sdp_8_arm64_qnx_toolchain",
-#     target_cpu = "arm64",
-#     target_os = "qnx",
-#     sdp_version = "8.0.0",
-#     use_default_package = True,
+#     name = "score_system_toolchain",
+#     target_cpu = "x86_64",
+#     target_os = "linux",
+#     use_system_toolchain = True,
 # )
+
+# *******************************************************************************
+# Setting AutoSD GCC (CPU:x86_64|OS:Linux|V:unknown|ES:autosd)
+# *******************************************************************************
+# gcc.toolchain(
+#     name = "score_autosd_9_toolchain",
+#     target_cpu = "x86_64",
+#     target_os = "linux",
+#     runtime_ecosystem = "autosd",
+#     version = "9",
+#     use_system_toolchain = True,
+# ) 
 
 use_repo(
     gcc,
@@ -144,15 +148,6 @@ use_repo(
     "my_toolchain_pkg",
     "score_qcc_toolchain",
     "score_qcc_toolchain_pkg",
-    # "score_sdp_8_arm64_qnx_toolchain",
-    # "score_sdp_8_arm64_qnx_toolchain_pkg",
+    "score_qcc_arm_toolchain",
+    "score_qcc_arm_toolchain_pkg",
 )
-
-# register_toolchains(
-    # "@score_system_toolchain//:linux-x86_64-gcc-unknown-host",
-    # "@score_gcc_toolchain//:linux-x86_64-gcc-12.2.0-generic",
-    # "@score_autosd_9_toolchain//:linux-x86_64-gcc-unknown-autosd",
-    # "@my_toolchain//:linux-x86_64-gcc-12.2.0-generic",
-    # "@score_sdp_8_x86_64_qnx_toolchain//:qnx-x86_64-gcc-12.2.0-generic",
-    # "@score_sdp_8_arm64_qnx_toolchain//:qnx-arm64-gcc-12.2.0-generic",
-# )

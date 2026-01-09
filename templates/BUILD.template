@@ -21,21 +21,7 @@ filegroup(
     name = "empty",
 )
 
-cc_toolchain_config(
-    name = "cc_toolchain_config",
-    ar_binary = "@%{tc_pkg_repo}//:ar",
-    cc_binary = "@%{tc_pkg_repo}//:gcc",
-    cxx_binary = "@%{tc_pkg_repo}//:gpp",
-    gcov_binary = "@%{tc_pkg_repo}//:gcov",
-    strip_binary = "@%{tc_pkg_repo}//:strip",
-    sysroot = "@%{tc_pkg_repo}//:sysroot_dir",
-    host_dir = "@%{tc_pkg_repo}//:host_dir",
-    target_dir = "@%{tc_pkg_repo}//:target_dir",
-    cxx_builtin_include_directories = "@%{tc_pkg_repo}//:cxx_builtin_include_directories",
-    target_cpu = "%{tc_cpu}",
-    target_os = "%{tc_os}",
-    visibility = ["//visibility:public"],
-)
+%{cc_toolchain_config}
 
 cc_toolchain(
     name = "cc_toolchain",

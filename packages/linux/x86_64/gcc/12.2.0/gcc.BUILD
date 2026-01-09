@@ -50,7 +50,7 @@ filegroup(
 )
 
 filegroup(
-    name = "gcc",
+    name = "cc",
     srcs = ["bin/x86_64-unknown-linux-gnu-gcc"],
 )
 
@@ -60,7 +60,7 @@ filegroup(
 )
 
 filegroup(
-    name = "gpp",
+    name = "cxx",
     srcs = ["bin/x86_64-unknown-linux-gnu-g++"],
 )
 

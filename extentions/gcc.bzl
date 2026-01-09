@@ -65,7 +65,7 @@ _attrs_tc = {
         doc = "TBD",
     ),
     "runtime_ecosystem": attr.string(
-        default = "generic",
+        default = "posix",
         mandatory = False,
         doc = "TBD",
     ),
@@ -169,6 +169,8 @@ def _get_toolchains(tags):
             "tc_license_info_url": tag.license_info_url,
             "tc_license_path": tag.license_path,
             "tc_runtime_ecosystem": tag.runtime_ecosystem,
+            "cc_toolchain_config": "@score_bazel_cpp_toolchains//templates/{}:cc_toolchain_config.bzl.template".format(tag.target_os),
+            "cc_toolchain_flags": "@score_bazel_cpp_toolchains//templates/{}:cc_toolchain_flags.bzl.template".format(tag.target_os),
         }
         toolchains.append(toolchain)
     return toolchains
@@ -236,7 +238,6 @@ def _impl(mctx):
     """
     toolchains, archives = _get_info(mctx)
     for archive_info in archives:
-        print(archive_info["name"])
         http_archive(
             name = archive_info["name"],
             urls = [archive_info["url"]],
@@ -246,8 +247,6 @@ def _impl(mctx):
         )
 
     for toolchain_info in toolchains:
-        print(toolchain_info["name"])
-        print(toolchain_info["sdp_to_link"])
         gcc_toolchain(
             name = toolchain_info["name"],
             extra_compile_flags = toolchain_info["tc_extra_compile_flags"],
@@ -262,6 +261,8 @@ def _impl(mctx):
             tc_system_toolchain = toolchain_info["use_system_toolchain"],
             tc_runtime_ecosystem = toolchain_info["tc_runtime_ecosystem"],
             gcc_version = toolchain_info["tc_version"],
+            cc_toolchain_config = toolchain_info["cc_toolchain_config"],
+            cc_toolchain_flags = toolchain_info["cc_toolchain_flags"],
         )
 
 gcc = module_extension(
