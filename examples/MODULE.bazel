@@ -68,6 +68,17 @@ gcc.toolchain(
     target_os = "linux",
     version = "12.2.0",
     use_default_package = True,
+)
+
+# *******************************************************************************
+# Setting default GCC (CPU:arm64|OS:Linux|V:12.2.0|ES:posix)
+# *******************************************************************************
+gcc.toolchain(
+    name = "score_arm64_gcc_toolchain",
+    target_cpu = "arm64",
+    target_os = "linux",
+    version = "12.2.0",
+    use_default_package = True,
 ) 
 
 # *******************************************************************************
@@ -144,6 +155,8 @@ use_repo(
     # "score_system_toolchain",
     "score_gcc_toolchain",
     "score_sdp",
+    "score_arm64_gcc_toolchain",
+    "score_arm64_gcc_toolchain_pkg",
     "my_toolchain",
     "my_toolchain_pkg",
     "score_qcc_toolchain",

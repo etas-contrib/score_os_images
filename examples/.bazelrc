@@ -40,6 +40,19 @@ build:host_config_2 --config=x86_64-linux
 build:host_config_2 --extra_toolchains=@my_toolchain//:x86_64-linux-gcc_12.2.0-posix
 
 # -------------------------------------------------------------------------------
+# Config dedicated to target platform CPU:arm64 and OS:linux
+# -------------------------------------------------------------------------------
+build:arm64-linux --config=shared
+build:arm64-linux --platforms=@score_bazel_platforms//:arm64-linux-gcc_12.2.0-posix
+
+# -------------------------------------------------------------------------------
+# Different toolchain configuration for arm64-linux
+# -------------------------------------------------------------------------------
+build:target_config_3 --config=arm64-linux
+build:target_config_3 --extra_toolchains=@score_arm64_gcc_toolchain//:arm64-linux-gcc_12.2.0-posix
+
+
+# -------------------------------------------------------------------------------
 # Config dedicated to target platform CPU:x86_64 and OS:QNX
 # -------------------------------------------------------------------------------
 build:x86_64-qnx --config=shared
