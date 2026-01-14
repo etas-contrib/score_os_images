@@ -29,7 +29,7 @@ cc_toolchain(
     ar_files = "@%{tc_pkg_repo}//:all_files",
     as_files = "@%{tc_pkg_repo}//:all_files",
     compiler_files = "@%{tc_pkg_repo}//:all_files",
-    coverage_files = "@%{tc_pkg_repo}//:all_files",
+    coverage_files = ":all_files",
     dwp_files = ":empty",
     linker_files = "@%{tc_pkg_repo}//:all_files",
     objcopy_files = ":empty",

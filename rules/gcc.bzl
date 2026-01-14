@@ -28,6 +28,14 @@ def _get_cc_config_linux(rctx):
     """ TODO: Write docstring
     """
     return """
+filegroup(
+    name = "all_files",
+    srcs = [
+        "@{tc_pkg_repo}//:all_files",
+        "gcov_wrapper",
+    ]
+)
+
 cc_toolchain_config(
     name = "cc_toolchain_config",
     ar_binary = "@{tc_pkg_repo}//:ar",
@@ -50,6 +58,13 @@ def _get_cc_config_qnx(rctx):
     """ TODO: Write docstring
     """
     return """
+filegroup(
+    name = "all_files",
+    srcs = [
+        "@{tc_pkg_repo}//:all_files",
+    ]
+)
+
 cc_toolchain_config(
     name = "cc_toolchain_config",
     ar_binary = "@{tc_pkg_repo}//:ar",
@@ -138,6 +153,20 @@ def _impl(rctx):
         {},
     )
 
+    if rctx.attr.tc_os == "linux":
+        # There is an issue with gcov and cc_toolchain config. 
+        # See: https://github.com/bazelbuild/rules_cc/issues/351
+        rctx.template(
+            "gcov_wrapper",
+            rctx.attr._cc_gcov_wrapper_script,
+            {
+                "%{tc_gcov_path}": "external/score_bazel_cpp_toolchains++gcc+{repo}/bin/{cpu}-unknown-linux-gnu-gcov".format(
+                    repo = rctx.attr.tc_pkg_repo,
+                    cpu = "aarch64le" if rctx.attr.tc_cpu == "arm64" else rctx.attr.tc_cpu,
+                ),
+            },
+        )
+
 gcc_toolchain = repository_rule(
     implementation = _impl,
     attrs = {
@@ -163,5 +192,8 @@ gcc_toolchain = repository_rule(
             default = "@score_bazel_cpp_toolchains//templates:BUILD.template",
             doc = "Path to the Bazel BUILD file template for the toolchain.",
         ),
+        "_cc_gcov_wrapper_script": attr.label(
+            default = "@score_bazel_cpp_toolchains//templates/linux:cc_gcov_wrapper.template",
+        )
     },
 )
