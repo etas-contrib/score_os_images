@@ -347,6 +347,32 @@ def _impl(ctx):
 
     supports_pic_feature = feature(name = "supports_pic", enabled = True)
 
+    coverage_feature = feature(
+        name = "coverage",
+        enabled = True,
+        provides = ["profile"],
+        flag_sets = [
+            flag_set(
+                actions = [
+                    ACTION_NAMES.preprocess_assemble,
+                    ACTION_NAMES.c_compile,
+                    ACTION_NAMES.cpp_compile,
+                    ACTION_NAMES.cpp_header_parsing,
+                    ACTION_NAMES.cpp_module_compile,
+                ],
+                flag_groups = ([
+                    flag_group(["-fprofile-arcs", "-ftest-coverage"]),
+                ]),
+            ),
+            flag_set(
+                actions = all_link_actions,
+                flag_groups = ([
+                    flag_group(["-fprofile-arcs", "-ftest-coverage", "-lgcov"]),
+                ]),
+            ),
+        ],
+    )
+
     # The order of the features is relevant, they are applied in this specific order.
     # A command line parameter from a feature at the end of the list will appear
     # after a command line parameter from a feature at the beginning of the list.
@@ -369,6 +395,7 @@ def _impl(ctx):
         supports_dynamic_linker_feature,
         supports_pic_feature,
         supports_fission_feature,
+        coverage_feature,
     ]
 
     cxx_builtin_include_directories = []
