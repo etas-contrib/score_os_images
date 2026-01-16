@@ -26,7 +26,7 @@ bazel_dep(name = "bazel_skylib", version = "1.8.1")
 # Constraint values for specifying platforms and toolchains
 # *******************************************************************************
 bazel_dep(name = "platforms", version = "1.0.0")
-bazel_dep(name = "score_bazel_platforms", version = "0.0.3")
+bazel_dep(name = "score_bazel_platforms", version = "0.1.0")
 git_override(
     module_name = "score_bazel_platforms",
     remote = "https://github.com/eclipse-score/bazel_platforms.git/",
@@ -59,7 +59,7 @@ local_path_override(
 #     * ES:    Runtime-EcoSystem
 #
 # *******************************************************************************
-gcc = use_extension("@score_bazel_cpp_toolchains//extentions:gcc.bzl", "gcc")
+gcc = use_extension("@score_bazel_cpp_toolchains//extentions:gcc.bzl", "gcc", dev_dependency = True)
 
 # *******************************************************************************
 # Setting default GCC (CPU:x86_64|OS:Linux|V:12.2.0|ES:posix)
@@ -113,7 +113,6 @@ gcc.toolchain(
     target_os = "qnx",
     sdp_version = "8.0.0",
     version = "12.2.0",
-    license_path = "/opt/score_qnx/license/licenses",
     use_default_package = True,
 )
 
@@ -129,6 +128,7 @@ gcc.toolchain(
     use_default_package = True,
 )
 
+# TODO: Not yet supported
 # *******************************************************************************
 # Setting local host GCC (CPU:x86_64|OS:Linux|V:unknown|ES:host)
 # *******************************************************************************
@@ -139,6 +139,7 @@ gcc.toolchain(
 #     use_system_toolchain = True,
 # )
 
+# TODO: Not yet supported
 # *******************************************************************************
 # Setting AutoSD GCC (CPU:x86_64|OS:Linux|V:unknown|ES:autosd)
 # *******************************************************************************
@@ -153,11 +154,9 @@ gcc.toolchain(
 
 use_repo(
     gcc,
-    # "score_system_toolchain",
     "score_gcc_toolchain",
     "score_arm64_gcc_toolchain",
     "my_toolchain",
-    "my_toolchain_pkg",
     "score_qcc_toolchain",
     "score_qcc_arm_toolchain",
 )
