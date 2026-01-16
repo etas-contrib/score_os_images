@@ -48,7 +48,7 @@ _attrs_sdp = {
 # GCC interface API for toolchain tag class
 _attrs_tc = {
     "name": attr.string(
-        default = "score_gcc_toolchain",
+        mandatory = True,
         doc = "Toolchain repo name, default set to `score_gcc_toolchain`.",
     ),
     "sdp_to_link": attr.string(
@@ -106,7 +106,7 @@ _attrs_tc = {
         doc = "Version of the SDP package.",
     ),
     "license_path": attr.string(
-        default = "",
+        default = "/opt/score_qnx/license/licenses",
         mandatory = False,
         doc = "Path to the shared license file.",
     ),
@@ -178,7 +178,7 @@ def _get_toolchains(tags):
 def _create_and_link_sdp(toolchain_info):
     """ TODO: Write docstring
     """
-    pkg_name = "score_sdp" if toolchain_info["name"] == "score_gcc_toolchain" else "{}_pkg".format(toolchain_info["name"])
+    pkg_name = "{}_pkg".format(toolchain_info["name"])
     identifier = "gcc"
     version = toolchain_info["tc_version"]
     if toolchain_info["tc_os"] == "qnx":

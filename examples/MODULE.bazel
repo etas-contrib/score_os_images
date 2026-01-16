@@ -65,6 +65,7 @@ gcc = use_extension("@score_bazel_cpp_toolchains//extentions:gcc.bzl", "gcc")
 # Setting default GCC (CPU:x86_64|OS:Linux|V:12.2.0|ES:posix)
 # *******************************************************************************
 gcc.toolchain(
+    name = "score_gcc_toolchain",
     target_cpu = "x86_64",
     target_os = "linux",
     version = "12.2.0",
@@ -104,7 +105,7 @@ gcc.toolchain(
 )
 
 # *******************************************************************************
-# Setting GCC (CPU:x86_64|OS:QNX|version(sdp):8.0)
+# Setting GCC (CPU:x86_64|OS:QNX|version(sdp):8.0.0|ES:posix)
 # *******************************************************************************
 gcc.toolchain(
     name = "score_qcc_toolchain",
@@ -117,7 +118,7 @@ gcc.toolchain(
 )
 
 # *******************************************************************************
-# Setting GCC (CPU:arm64|OS:QNX|version(sdp):8.0)
+# Setting GCC (CPU:arm64|OS:QNX|version(sdp):8.0.0|ES:posix)
 # *******************************************************************************
 gcc.toolchain(
     name = "score_qcc_arm_toolchain",
@@ -125,7 +126,6 @@ gcc.toolchain(
     target_os = "qnx",
     sdp_version = "8.0.0",
     version = "12.2.0",
-    license_path = "/opt/score_qnx/license/licenses",
     use_default_package = True,
 )
 
@@ -155,13 +155,9 @@ use_repo(
     gcc,
     # "score_system_toolchain",
     "score_gcc_toolchain",
-    "score_sdp",
     "score_arm64_gcc_toolchain",
-    "score_arm64_gcc_toolchain_pkg",
     "my_toolchain",
     "my_toolchain_pkg",
     "score_qcc_toolchain",
-    "score_qcc_toolchain_pkg",
     "score_qcc_arm_toolchain",
-    "score_qcc_arm_toolchain_pkg",
 )
