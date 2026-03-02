@@ -1,0 +1,98 @@
+
+[uid=0 gid=0 perms=0755]
+
+[type=link] /dev/console=/dev/ser1
+
+################################################################################################
+## WDT driver
+################################################################################################
+/bin/wdtkick=wdtkick
+
+
+################################################################################################
+## Serial drivers
+################################################################################################
+/sbin/devc-serminiuart=devc-serminiuart
+/sbin/devc-serpl011=devc-serpl011
+
+################################################################################################
+## Block drivers
+################################################################################################
+/sbin/devb-sdmmc-bcm2711=devb-sdmmc-bcm2711
+/sbin/devb-loopback=devb-loopback
+
+
+################################################################################################
+## Network driver files
+################################################################################################
+/lib/dll/devs-genet.so=devs-genet.so
+
+################################################################################################
+## SPI driver
+################################################################################################
+/sbin/spi-bcm2711=spi-bcm2711
+
+/etc/system/config/spi/spi.conf = {
+# See spi-template.conf or SDP docs for a full description of the configuration fields.
+
+[globals]
+verbose=5
+
+[bus]
+busno=0
+name=spi0
+base=0xfe204000
+irq=150
+input_clock=500000000
+bs=rpanic=48,tpanic=16
+dma_attach_opts=num_cbs=256,range_min=0,range_max=14,typed_mem=sysram&below1G
+dma_thld=4
+
+[dev]
+parent_busno=0
+devno=0
+name=dev0
+clock_rate=5000000
+cpha=1
+cpol=0
+bit_order=msb
+word_width=32
+idle_insert=1
+}
+
+################################################################################################
+## I2C drivers
+################################################################################################
+/sbin/i2c-bcm2711=i2c-bcm2711
+
+################################################################################################
+## I2C support
+################################################################################################
+/bin/isendrecv=isendrecv
+/bin/isend=isend
+
+################################################################################################
+## ENV profile
+################################################################################################
+[uid=0 gid=0 perms=0444] /etc/profile = {
+export HOME=/
+export SYSNAME=nto
+export TERM=xterm
+export PATH=/proc/boot:/sbin:/bin:/usr/bin:/usr/sbin:/usr/libexec
+export LD_LIBRARY_PATH=/proc/boot:/lib:/usr/lib:/lib/dll:/lib/dll/pci
+
+export PCI_HW_MODULE=/lib/dll/pci/pci_hw-bcm2711-rpi4.so
+export PCI_DEBUG_MODULE=/lib/dll/pci/pci_debug2.so
+export PCI_SLOG_MODULE=/lib/dll/pci/pci_slog2.so
+export PCI_BKWD_COMPAT_MODULE=/lib/dll/pci/pci_bkwd_compat.so
+umask 022
+}
+
+
+################################################################################################
+## startup scripts
+################################################################################################
+net-start.sh = qnx8/boards/rpi4-arm64/net-start.sh
+blk-start.sh = qnx8/boards/rpi4-arm64/blk-start.sh
+mount-fs.sh = qnx8/boards/rpi4-arm64/mount-fs.sh
+misc-services.sh = qnx8/boards/rpi4-arm64/misc-services.sh

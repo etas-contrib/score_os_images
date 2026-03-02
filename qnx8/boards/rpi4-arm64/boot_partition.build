@@ -1,0 +1,30 @@
+# mkfatfsimage RPI4 image boot partition build file
+[num_sectors=512k] # 256MB
+[vol_lbl=boot]
+
+# RPI4 firmware files
+bcm2711-rpi-4-b.dtb=bcm2711-rpi-4-b.dtb
+start4.elf=start4.elf
+start4x.elf=start4x.elf
+start4db.elf=start4db.elf
+start4cd.elf=start4cd.elf
+fixup4.dat=fixup4.dat
+fixup4x.dat=fixup4x.dat
+fixup4cd.dat=fixup4cd.dat
+fixup4db.dat=fixup4db.dat
+
+# QNX IFS
+ifs-rpi4-arm64.bin=ifs-rpi4-arm64.bin
+
+config.txt={
+arm_64bit=1
+cmdline=startup.txt
+device_tree=bcm2711-rpi-4-b.dtb
+enable_uart=1
+force_turbo=1
+gpu_mem=16
+kernel=ifs-rpi4-arm64.bin
+}
+
+startup.txt={
+}

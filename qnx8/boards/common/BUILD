@@ -12,5 +12,6 @@ filegroup(
     visibility = [
         "//qnx8/boards/qemu-arm64virt:__pkg__",
         "//qnx8/boards/qemu-x86_64:__pkg__",
+        "//qnx8/boards/rpi4-arm64:__pkg__",
     ],
 )

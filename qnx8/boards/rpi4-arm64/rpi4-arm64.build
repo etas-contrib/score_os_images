@@ -1,0 +1,30 @@
+################################################################################################
+##
+## Build file for a QNX operating system
+##
+################################################################################################
+
+[-optional]
+[+keeplinked]
+[image=0x40080000]
+
+[virtual=aarch64le,raw] boot = {
+	startup-bcm2711-rpi4 -v -D miniuart -u reg # -W 2500
+	PATH=/proc/boot:/sbin:/bin:/usr/bin:/usr/sbin:/usr/libexec LD_LIBRARY_PATH=/proc/boot:/lib:/usr/lib:/lib/dll:/lib/dll/pci procnto-smp-instr -v -mL
+}
+
+# add external search path in case we are building the image with bazel in context of another module *sigh*
+[search=${MKIFS_PATH}:external/os_images+:qnx8/boards/rpi4-arm64/bsp_install]
+
+# all owned by root
+[uid=0 gid=0 perms=0555 dperms=0555]
+
+
+[+script] startup-script = qnx8/boards/rpi4-arm64/initscript
+
+# include the target specific build file
+[+include] qnx8/boards/rpi4-arm64/target.build
+
+# include the common build file
+[+include] qnx8/boards/common/common.build
+

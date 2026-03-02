@@ -36,6 +36,78 @@ register_toolchains("@toolchains_qnx_ifs//:ifs_x86_64", dev_dependency=True)
 # mkifs is independent of target platform, so we just need _one_ toolchain.
 #register_toolchains("@toolchains_qnx_ifs//:ifs_aarch64")
 
+# bazel_dep(name = "score_rules_imagefs", version = "0.0.1")
+# local_path_override(
+#     module_name = "score_rules_imagefs",
+#     path = "../rules_imagefs",
+# )
+# toolchain_imagefs = use_extension("@score_rules_imagefs//extensions:imagefs.bzl", "imagefs", dev_dependency=True)
+# toolchain_imagefs.sdp(
+#     name = "imagefs_toolchain",
+#     build_file = "@os_images//qnx8:qnx_ifs.BUILD",
+#     url = "https://artifactory.boschdevcloud.com/artifactory/vrte-conan-releases-local/vrte-ci/qnx-sdp8/2025.12.1/tools/39a6e8fc924e6c3cc8eedd34cb02798a/package/3d2268685caec3e0b869469fb726217a3d45aba6/4a0afc64da694d0eb33a804af7429e5d/conan_package.tgz",
+#     sha256 = "03a0afc329e4cbc78a1d0829009fad0de47fb335189b36c81670bfd4ec0e67de",
+# )
+
+# use_repo(toolchain_imagefs, "imagefs_toolchain")
+# register_toolchains("@imagefs_toolchain//:imagefs", dev_dependency=True)
+
+# ------------------------------------------------------------------------------
+# External BSP archives
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+# Replace the closed-source BSP ZIP with the open-source GitHub repo
+http_archive(
+    name = "qnx8_bsp_rpi4_src",
+    url = "https://github.com/qnx/bsp_raspberrypi-bcm2711-rpi4/archive/refs/heads/main.tar.gz",
+    strip_prefix = "bsp_raspberrypi-bcm2711-rpi4-main",
+    # sha256 = "<compute after first download>",
+    build_file_content = """
+# Expose the Makefile as a single-file target for $(location) in genrule
+exports_files(["Makefile"])
+
+# Expose all BSP sources so the genrule can access them
+filegroup(
+    name = "all_srcs",
+    srcs = glob(["**"]),
+    visibility = ["//visibility:public"],
+)
+""",
+)
+
+# ------------------------------------------------------------------------------
+# External RPI4 firmware archive
+http_archive(
+    name = "rpi4_firmware_files",
+    url = "https://github.com/raspberrypi/firmware/releases/download/1.20250915/raspi-firmware_1.20250915.orig.tar.xz",
+    strip_prefix = "raspi-firmware-1.20250915/boot",
+    sha256 = "545b5f8a624b98222c7b4ef4244ac219845993aba15e49d5440b21ccd722340e",
+    build_file_content = """
+filegroup(
+    name = "rpi4_files",
+    srcs = [
+        "start4.elf",
+        "start4x.elf",
+        "start4db.elf", 
+        "start4cd.elf",
+        "fixup4.dat",
+        "fixup4x.dat",
+        "fixup4db.dat",
+        "fixup4cd.dat",
+    ],
+    visibility = ["//visibility:public"],
+)
+""",
+)
+# External RPI4 dtb file
+http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
+
+http_file(
+    name = "rpi4_dtb",
+    url = "https://github.com/raspberrypi/firmware/raw/refs/heads/stable/boot/bcm2711-rpi-4-b.dtb",
+    downloaded_file_path = "bcm2711-rpi-4-b.dtb",
+    # sha256 = "<compute after first download>",
+)
 
 # ------------------------------------------------------------------------------
 # General purpose Bazel extensions

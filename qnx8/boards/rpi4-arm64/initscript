@@ -1,0 +1,96 @@
+SYSNAME=nto
+TERM=xterm
+ENV=/etc/profile
+
+procmgr_symlink ../../proc/boot/ldqnx-64.so.2 /usr/lib/ldqnx-64.so.2
+
+## Needed for ksh to run the echo command below
+pipe
+
+display_msg " "
+ksh -c "echo Welcome to QNX $(uname -r) on $(uname -m) !"
+display_msg " "
+
+#######################################################################
+## WatchDog utility
+## If startup is given -W parameter then the wdtkick utility MUST be uncommented below
+#######################################################################
+#display_msg "---> Starting wdtkick ..."
+#wdtkick -W0x24:0x5A028E4C -W0x1c:0x5A000020
+
+#######################################################################
+display_msg "---> Starting slogger2"
+#######################################################################
+/bin/slogger2 &
+waitfor /dev/slog2
+
+dumper
+mqueue
+random
+
+
+#######################################################################
+## Console SERIAL driver
+#######################################################################
+display_msg "---> Starting serial driver"
+devc-serminiuart -b115200 -c500000000 -e -F -u1 0xfe215000,125
+waitfor /dev/ser1
+reopen /dev/ser1
+
+/sbin/devc-pty
+
+#######################################################################
+## I2C driver
+#######################################################################
+#display_msg "---> Starting I2C driver ..."
+#i2c-bcm2711 -p0xfe804000 --b100000 --u1
+
+#######################################################################
+## PCIe driver
+#######################################################################
+#display_msg "---> Starting PCI Server ..."
+#PCI_HW_MODULE=/lib/dll/pci/pci_hw-bcm2711-rpi4.so
+#PCI_BKWD_COMPAT_MODULE=/lib/dll/pci/pci_bkwd_compat.so
+#PCI_SLOG_MODULE=/lib/dll/pci/pci_slog2.so
+#PCI_DEBUG_MODULE=/lib/dll/pci/pci_debug2.so
+
+#pci-server --bus-scan-limit=1 -c &
+#waitfor /dev/pci
+
+#######################################################################
+## SPI driver
+#######################################################################
+#display_msg "---> Starting SPI master driver ..."
+#spi-bcm2711
+#waitfor /dev/io-spi
+
+#######################################################################
+# Initial block device setup
+#######################################################################
+/bin/sh /proc/boot/blk-start.sh
+
+#######################################################################
+# Mount file systems
+#######################################################################
+/bin/sh /proc/boot/mount-fs.sh
+
+#######################################################################
+# Start networking, set hostname
+#######################################################################
+/bin/sh /proc/boot/net-start.sh
+
+#######################################################################
+# Starting remaining services startup script
+#######################################################################
+/bin/sh /proc/boot/misc-services.sh
+
+#######################################################################
+# Starting consoles and shells
+#######################################################################
+display_msg "---> Starting shell ... Have fun :-)"
+HOME=/root
+umask 022
+
+# replace this shell with an interactive one
+[+session] /bin/ksh -l
+
