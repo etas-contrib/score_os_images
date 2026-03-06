@@ -26,6 +26,9 @@
 ## Network driver files
 ################################################################################################
 /lib/dll/devs-genet.so=devs-genet.so
+/lib/dll/mods-fdt.so=mods-fdt.so
+/lib/dll/mods-phy_fdt.so=mods-phy_fdt.so
+
 
 ################################################################################################
 ## SPI driver

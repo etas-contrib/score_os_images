@@ -1,14 +1,21 @@
 #!/bin/sh
 
 DEVICE_NAME_PREFIX=genet
-IP_ADDRESS_vtnet0="192.168.120.20/24"
+IP_ADDRESS_genet0="192.168.120.20/24"
 HOSTNAME=rpi4-arm64
 
+# Try loading network configuration from /boot partition first.
+if [ -f /boot/etc/settings/network ]; then
+	. /boot/etc/settings/network
+fi
+
+# 2nd option: Try loading network configuration from S-CORE partition.
 if [ -f /opt/score/etc/settings/network ]; then
 	. /opt/score/etc/settings/network
 fi
 
 # Set hostname
+echo "---> Setting hostname to $HOSTNAME"
 setconf _CS_HOSTNAME ${HOSTNAME}
 
 echo "---> Starting Ethernet driver"
@@ -46,6 +53,6 @@ else
 fi
 
 sysctl -w net.inet.icmp.bmcastecho=1 > /dev/null
-sysctl -w qnx.sec.droproot=33:33 > /dev/null
+#sysctl -w qnx.sec.droproot=33:33 > /dev/null
 
 exit 0

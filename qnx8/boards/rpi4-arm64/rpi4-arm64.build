@@ -6,7 +6,7 @@
 
 [-optional]
 [+keeplinked]
-[image=0x40080000]
+[image=0x80000]
 
 [virtual=aarch64le,raw] boot = {
 	startup-bcm2711-rpi4 -v -D miniuart -u reg # -W 2500

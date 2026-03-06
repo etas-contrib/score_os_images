@@ -2,8 +2,21 @@
 
 echo "---> Mounting file systems"
 
-# Mount probe list: hd0... is MBR, hd0.qnx6.x is GPT
-MOUNT_PROBE_LIST="hd0t177 hd0.qnx6.0 hd0.qnx6.1"
+# On HW platforms: Mount first FAT partition to /boot
+if [ -b /dev/sd0.ms.0 ]; then
+    # GPT style partition
+    echo "Mounting /boot partition /dev/sd0.ms.0"
+    mount -tdos /dev/sd0.ms.0 /boot
+elif [ -b /dev/sd0t12 ]; then´
+	# MBR style partition
+    echo "Mounting /boot partition /dev/sd0t12"
+    mount -tdos /dev/sd0t12 /boot
+fi
+
+
+# Mount S-CORE partition to /opt/score
+# Mount probe list: sd0t... is MBR, sd0.qnx6.x is GPT
+MOUNT_PROBE_LIST="sd0t177 sd0.qnx6.0 sd0.qnx6.1"
 MOUNT_POINT=/opt/score
 
 if [ -f /boot/etc/settings/mount ]; then
