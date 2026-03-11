@@ -1,5 +1,7 @@
-load("@score_toolchains_qnx//rules/fs:ifs.bzl", "qnx_ifs")
-# load("@score_rules_imagefs//rules/qnx:ifs.bzl", "qnx_ifs")
+load("@score_rules_imagefs//rules/qnx:ifs.bzl", "qnx_ifs")
+load("@score_rules_imagefs//rules/qnx:fatfs.bzl", "fatfs")
+load("@score_rules_imagefs//rules/qnx:qnx6fs.bzl", "qnx6fs")
+load("@score_rules_imagefs//rules/qnx:diskimage.bzl", "diskimage")
 
 qnx_ifs (
     name = "ifs-rpi4-arm64",
@@ -9,7 +11,7 @@ qnx_ifs (
         "//qnx8/boards/common:common_files",
         ":bsp_qnx8_rpi4_binaries",
         ] + glob(["*.sh"], exclude=["run-*.sh"]),
-        search_roots = ["../../../bazel-out/k8-fastbuild/bin/qnx8/boards/rpi4-arm64/bsp_install"],
+    search_roots = ["../../../bazel-out/k8-fastbuild/bin/qnx8/boards/rpi4-arm64/bsp_install"],
     extension = "bin",
 )
 
@@ -22,8 +24,8 @@ genrule(
         "@qnx8_bsp_rpi4_src//:Makefile",
     ],
     tools = [
-        "@toolchains_qnx_sdp//:all_files",
-        "@toolchains_qnx_sdp//:qcc",
+        "@score_qnx_imagefs_toolchain_pkg//:all_files",
+        "@score_qnx_imagefs_toolchain_pkg//:mkifs",
     ],
     outs = [
         "bsp_install/aarch64le/boot/sys/startup-bcm2711-rpi4",
@@ -55,10 +57,11 @@ genrule(
 
         # Get QNX_HOST and QNX_TARGET from `qnxsdp-env.sh` which is part of the qnx sdp 
         # and sets up the environment for using qcc.
-        # qcc is at host/linux/x86_64/usr/bin/qcc, so QNX_HOST is 3 levels up
-        QCC_PATH=$$(realpath $(location @toolchains_qnx_sdp//:qcc))
+        # Derive SDP root from the mkifs binary path (a single-file target
+        # whose location Bazel can resolve), stripping the known suffix.
+        MKIFS_PATH=$$(realpath $(location @score_qnx_imagefs_toolchain_pkg//:mkifs))
+        SDP_ROOT=$${MKIFS_PATH%/host/linux/x86_64/usr/bin/mkifs}
         export HOME=/var/tmp
-        SDP_ROOT=$$(dirname $$(dirname $$(dirname $$(dirname $$(dirname $$(dirname $$QCC_PATH))))))
         source "$$SDP_ROOT/qnxsdp-env.sh"
         #export EXTRA_INCVPATH="$$BSP_DIR/install/usr/include"
 
@@ -82,49 +85,53 @@ genrule(
     """,
 )
 
-genrule(
-    name = "qnx8_rpi4_bootpartition_image",
+fatfs(
+    name = "rpi4_bootfs",
+    build_file = "bootfs.build",
     srcs = [
         "@rpi4_firmware_files//:rpi4_files",
+        "@rpi4_firmware_files//:fixup4.dat",
         "@rpi4_dtb//file",
         ":ifs-rpi4-arm64",
-        ":boot_partition.build",
     ],
-    tools = [
-        "@toolchains_qnx_sdp//:all_files",
-        "@toolchains_qnx_sdp//:mkifs",
-    ],
-    outs = ["rpi4_boot_partition.img"],
-    cmd = """
-# Run mkfatfsimage to create the RPI4 boot partition image
-MKFS_PATH=$$(dirname $(location @toolchains_qnx_sdp//:mkifs))
-MKFATFSIMAGE="$$MKFS_PATH/mkfatfsimage"
-
-# Get the firmware directory from the first file in the filegroup
-FW_FILES=($(rootpaths @rpi4_firmware_files//:rpi4_files))
-FW_DIR=$$(dirname $${FW_FILES[0]})
-
-$$MKFATFSIMAGE -v $(location :boot_partition.build) \
-    -r $(location :ifs-rpi4-arm64) \
-    -r $$FW_DIR \
-    -r $(location @rpi4_dtb//file) \
-    . rpi4_boot_partition.img
-""",
+    # Pass directories to mkfatfsimage via env variables, so that the build file can reference them.
+    ext_repo_dir_mapping = {
+        "IFS_PATH": "$(location :ifs-rpi4-arm64)",
+        "RPI4_FIRMWARE_PATH": "$(location @rpi4_firmware_files//:fixup4.dat)",
+        "RPI4_DTB_PATH": "$(location @rpi4_dtb//file)",
+    },
+    extension = "img",
 )
 
-genrule(
-    name = "qnx8_rpi4_sdcard_image",
+qnx6fs(
+    name = "rpi4_qnx6fs",
+    build_file = "qnx6fs.build",
     srcs = [
-        ":qnx8_rpi4_bootpartition_image",
     ],
-    tools = [
-        "@toolchains_qnx_sdp//:all_files",
+    extension = "img",
+)
+
+diskimage(
+    name = "rpi4_sdcard",
+    build_file = ":sdcard_build_file",
+    srcs = [
+        ":rpi4_bootfs",
+        ":rpi4_qnx6fs",
     ],
-    outs = [
-        "rpi4_sdcard.img",
+    out = "rpi4_sdcard.img",
+    gpt_enabled = True,
+)
+
+# Generate the diskimage config file from the template by substituting
+# the Bazel output path of the bootfs image. diskimage requires an actual
+# file path (no search-path or env-var support), so we bake it in.
+genrule(
+    name = "sdcard_build_file",
+    srcs = [
+        "sdcard.build.tpl",
+        ":rpi4_bootfs",
+        ":rpi4_qnx6fs",
     ],
-    cmd = """
-        echo "This genrule is a placeholder for generating the SD card image. 
-        You can implement the image generation logic here, using the BSP binaries built in the previous genrule."
-    """,
+    outs = ["sdcard.build"],
+    cmd = "sed 's|$${BOOTFS_IMAGE}|$(location :rpi4_bootfs)|g;s|$${QNX6FS_IMAGE}|$(location :rpi4_qnx6fs)|g' $(location sdcard.build.tpl) > $@",
 )

@@ -1,4 +1,6 @@
 # mkfatfsimage RPI4 image boot partition build file
+[search=${IFS_PATH}:${RPI4_FIRMWARE_PATH}:${RPI4_DTB_PATH}]
+
 [num_sectors=512k] # 256MB
 [vol_lbl=boot]
 
