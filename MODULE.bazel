@@ -19,9 +19,10 @@ module(
 # QNX toolchains
 
 bazel_dep(name = "score_rules_imagefs", version = "0.0.1")
-local_path_override(
+git_override(
     module_name = "score_rules_imagefs",
-    path = "../../score_rules_imagefs",
+    remote = "https://github.com/eclipse-score/rules_imagefs.git",
+    commit = "38d5a1a5e5d83faa5d00e4d2f31c303db0d0f7de",
 )
 
 imagefs = use_extension("@score_rules_imagefs//extensions:imagefs.bzl", "imagefs", dev_dependency = True)
