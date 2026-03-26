@@ -477,6 +477,8 @@ ldqnx-64.so.2=ldqnx-64.so.2
 [uid=0 gid=0 type=dir dperms=0755] /boot
 [uid=0 gid=0 type=dir dperms=0755] /mnt
 [uid=0 gid=0 type=dir dperms=0755] /opt
+[uid=0 gid=0 type=dir dperms=0755] /opt/score
+[uid=0 gid=0 type=dir dperms=0755] /opt/test
 # lola requirement
 [type=link] /tmp_discovery=/run/lola_discovery
 

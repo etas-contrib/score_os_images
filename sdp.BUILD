@@ -66,3 +66,25 @@ filegroup(
     name = "mkdiskimage",
     srcs = ["host/linux/x86_64/usr/bin/diskimage"],
 )
+
+filegroup(
+    name = "qcc",
+    srcs = ["host/linux/x86_64/usr/bin/qcc"],
+)
+
+filegroup(
+    name = "host_sysroot",
+    srcs = glob([
+        "host/linux/x86_64/usr/bin/**",
+        "host/linux/x86_64/usr/lib/**",
+#        "host/linux/x86_64/usr/libexec/**",
+    ]),
+)
+
+filegroup(
+    name = "target_sysroot",
+    srcs = glob([
+        "target/qnx/aarch64le/**",
+        "target/qnx/usr/include/**",
+    ]),
+)
