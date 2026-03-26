@@ -1,4 +1,4 @@
-load("@score_toolchains_qnx//rules/fs:ifs.bzl", "qnx_ifs")
+load("@score_rules_imagefs//rules/qnx:ifs.bzl", "qnx_ifs")
 
 qnx_ifs (
     name = "ifs-qemu-x86_64",
@@ -7,6 +7,7 @@ qnx_ifs (
         "initscript",
         "//qnx8/boards/common:common_files"] + glob(["*.sh"], exclude=["run-*.sh"]),
     extension = "bin",
+    visibility = ["//visibility:public"],
 )
 
 genrule(

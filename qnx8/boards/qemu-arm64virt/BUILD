@@ -1,12 +1,13 @@
-load("@score_toolchains_qnx//rules/fs:ifs.bzl", "qnx_ifs")
+load("@score_rules_imagefs//rules/qnx:ifs.bzl", "qnx_ifs")
 
 qnx_ifs (
     name = "ifs-qemu-arm64virt",
     build_file = "qemu-arm64virt.build",
-    srcs = ["target.build", 
+    srcs = ["target.build",
         "initscript",
         "//qnx8/boards/common:common_files"] + glob(["*.sh"], exclude=["run-*.sh"]),
     extension = "bin",
+    visibility = ["//visibility:public"],
 )
 
 genrule(

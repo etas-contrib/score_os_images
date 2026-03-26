@@ -16,7 +16,7 @@ echo "---> Starting block driver"
 # virtio-blk values from QEMU virt fdt...
 devb-virtio cam user=20:20 blk cache=64M,auto=partition,vnode=2000,ncache=2000,commit=low virtio smem=0xa003e00,irq=79 blk ramdisk=20m
 
-waitfor /dev/$BLK_DEVICE_RAW 3
+waitfor /dev/$BLK_DEVICE_RAW 30 #Increase timeout value for arm64 as block device initialization takes longer time
 if [ ! -e /dev/$BLK_DEVICE_RAW ]
 then
     echo "ERROR: No block device detected"

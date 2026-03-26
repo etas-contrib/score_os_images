@@ -9,12 +9,9 @@ common --registry=https://raw.githubusercontent.com/eclipse-score/bazel_registry
 common --registry=https://bcr.bazel.build
 common --host_platform=@score_bazel_platforms//:x86_64-linux
 common --config=qnx8_0
-#common --credential_helper=*.qnx.com=%workspace%/.github/tools/qnx_credential_helper.py
-#common --credential_helper=*.qnx.com=%workspace%/tools/qnx_credential_helper.py
-#common --credential_helper_timeout="60s"
 
 # ------------------------------------------------------------------------------
-# QNX toolchain settings - see https://github.com/eclipse-score/toolchains_qnx
+# QNX toolchain settings
 # Common QNX build settings
 
 # mkifs is not a target platform specific tool, the host would be sufficient. But there is only
@@ -25,6 +22,7 @@ common --config=qnx8_0
 common:qnx8_0 --incompatible_strict_action_env
 common:qnx8_0 --sandbox_writable_path=/var/tmp
 common:qnx8_0 --platforms=@score_bazel_platforms//:aarch64-qnx-sdp_8.0.0-posix
+common:qnx8_0 --credential_helper=*.qnx.com=%workspace%/tools/qnx_credential_helper.py
 
-build:qnx8_0 --extra_toolchains=@score_qnx_imagefs_toolchain//:ifs-aarch64-qnx-sdp_8.0.0
+build:qnx8_0 --extra_toolchains=@score_qnx_ifs_toolchain//:ifs-aarch64-qnx-sdp_8.0.0
 

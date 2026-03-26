@@ -9,44 +9,47 @@ Following QNX 8 OS images can be created:
 
 ### QNX SDP
 
-Building the images requires a QNX SDP 8.0.3 (or later) available during build with following additional QNX SDP packages integrated:
+#### Using the S-CORE QNX SDP package
+
+The default QNX SDP package is set up in the top-level `MODULE.bazel` of this repo. It downloads the package
+from `qnx.com`. For being able to do this you need to use your MyQNX account credentials set up in your in 
+environment variables `SCORE_QNX_USER` and `SCORE_QNX_PASSWORD`. This can be accomplished in your `~/.bazelrc`:
+
+```
+build --action_env=SCORE_QNX_USER=<...>
+build --action_env=SCORE_QNX_PASSWORD=<...>
+```
+
+#### Using a custom QNX SDP package
+
+Building the QNX8 OS images requires a QNX SDP 8.0.3 (or later) available during build with following additional QNX SDP packages integrated:
 
 * QNX® SDP 8.0 Networking - io-sock Virtio Drivers
 * QNX® SDP 8.0 Virtualization Drivers (Block)
-* QNX® SDP 8.0 Virtualization Drivers (Startup)
+* QNX® SDP 8.0 QEMU Virtualization Drivers (Startup)
 
 Add the URL of the QNX SDP tarball to the `MODULE.bazel`:
 
 ```
 [...]
 
-toolchains_qnx = use_extension("@score_toolchains_qnx//:extensions.bzl", "toolchains_qnx", dev_dependency=True)
-toolchains_qnx.sdp(
-    url = "http://link/to/qnx803.tar.gz",
-    # or:
-    # url = "file:///path/to/qnx803.tar.gz",
-    sha256 = "<sha256-sum>",
+imagefs = use_extension("@score_rules_imagefs//extensions:imagefs.bzl", "imagefs", dev_dependency = True)
+imagefs.sdp(
+    name = "score_qnx_imagefs_toolchain_pkg",
+    url = "http://link/to/your/qnx80x.tar.xz",
+    sha256 = "<your-qnx80x.tar.xz-sha256sum>",
+    build_file = "//:sdp.BUILD",
 )
 
 [...]
 
 ```
 
-### bazelrc
-
-A `.bazelrc` should include general eclipse-score registry and toolchain requirements given by 
-https://github.com/eclipse-score/toolchains_qnx/blob/main/README.md .
+In case your QNX license requires to check out a license from a license server, you may want to add the
+information to your local `~/.bazelrc`:
 
 ```
-common --registry=https://raw.githubusercontent.com/eclipse-score/bazel_registry/main/
-common --registry=https://bcr.bazel.build
-
-common --incompatible_strict_action_env
-# mkifs is not a target platform specific tool, the host would be sufficient. But there is only
-# target platform specific toolchains defined for QNX in this repo.
-# Therefore we have to select a target platform and we choose x86_64-qnx.
-common --platforms=@score_toolchains_qnx//platforms:x86_64-qnx
-common --sandbox_writable_path=/var/tmp
+build --action_env=QNXLM_LICENSE_FILE=<...>
 ```
 
 ## Building QNX OS images
