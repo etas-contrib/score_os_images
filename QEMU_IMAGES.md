@@ -26,6 +26,28 @@ aarch64 image.
 The image targets are tagged `manual`, since building them boots QEMU and needs
 the base images to be downloaded.
 
+## Additional disk on /opt
+
+Both images mount an additional disk automatically on `/opt`. The ITF QEMU
+plugin attaches such a disk when it is passed via `--qemu-disk`; it always shows
+up as the second virtio block device `/dev/vdb`. The `fstab` entry uses `nofail`,
+so the images keep booting when no additional disk is attached.
+
+`//tests:qemu_disk_image` builds an example ext4 disk with
+[rules_imagefs](https://github.com/eclipse-score/rules_imagefs):
+
+```starlark
+py_itf_test(
+    name = "my_test",
+    args = [
+        "--qemu-config=$(location //ubuntu_x86_64:qemu_config)",
+        "--qemu-disk=$(location //tests:qemu_disk_image)",
+        "--qemu-rootfs=$(location //ubuntu_x86_64:image)",
+    ],
+    ...
+)
+```
+
 ## Build scripts
 
 All the image build scripts are located in the `//scripts` package.

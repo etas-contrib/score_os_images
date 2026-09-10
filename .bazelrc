@@ -16,3 +16,4 @@ test:qemu-integration --run_under=@score_itf//scripts:run_under_qemu
 
 common --registry=https://raw.githubusercontent.com/eclipse-score/bazel_registry/main/
 common --registry=https://bcr.bazel.build
+common --extra_toolchains=@score_linux_x86_64_ext4_toolchain//:ext4-x86_64-linux

@@ -96,6 +96,9 @@ runcmd:
       # Speed up boot: nothing must wait for a network that only comes up once
       # QEMU has attached the tap device.
       systemctl disable systemd-networkd-wait-online.service
+      # Mount an additional disk (ITF "--qemu-disk") on /opt. "nofail" keeps the
+      # image bootable when no such disk is attached.
+      echo '/dev/vdb /opt auto defaults,nofail,x-systemd.device-timeout=5s 0 0' >> /etc/fstab
       # From now on the image is fully configured; never run cloud-init again.
       touch /etc/cloud/cloud-init.disabled
       sync

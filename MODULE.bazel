@@ -30,11 +30,25 @@ bazel_dep(name = "rules_pkg", version = "1.0.1")
 bazel_dep(name = "score_itf", version = "0.5.0", dev_dependency = True)
 bazel_dep(name = "rules_python", version = "2.3.2", dev_dependency = True)
 
+# TODO: Switch back to a released version once `--qemu-disk` is part of a tagged release.
 git_override(
     module_name = "score_itf",
-    commit = "53a7ba37bf304230fa846ec303c902ec12c8aaa2",
+    commit = "38ae9a3dd98ccc7434e1f8b57ca4a3d2bac82e2f",
     remote = "https://github.com/eclipse-score/itf.git",
 )
+
+# Filesystem image rules, used to build the additional disk image attached to the
+# QEMU targets via `--qemu-disk`.
+bazel_dep(name = "score_rules_imagefs", version = "0.1.0", dev_dependency = True)
+
+imagefs = use_extension("@score_rules_imagefs//extensions:imagefs.bzl", "imagefs", dev_dependency = True)
+imagefs.toolchain(
+    name = "score_linux_x86_64_ext4_toolchain",
+    target_cpu = "x86_64",
+    target_os = "linux",
+    type = "ext4",
+)
+use_repo(imagefs, "score_linux_x86_64_ext4_toolchain")
 
 python = use_extension("@rules_python//python/extensions:python.bzl", "python", dev_dependency = True)
 python.defaults(python_version = "3.12")

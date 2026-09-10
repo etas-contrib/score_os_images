@@ -97,6 +97,9 @@ done
 
 # Enable root login and empty passwords for integration testing, not for production use.
 sshpass -p linux ssh -o StrictHostKeyChecking=no -p 2222 root@localhost "printf 'PermitRootLogin yes\nPermitEmptyPasswords yes\nPasswordAuthentication yes\n' > /etc/ssh/sshd_config.d/99-integration-test.conf"
+# Mount an additional disk (ITF "--qemu-disk") on /opt. "nofail" keeps the image
+# bootable when no such disk is attached; crinit runs "mount -a" during boot.
+sshpass -p linux ssh -o StrictHostKeyChecking=no -p 2222 root@localhost "printf '\n# Additional disk attached by the ITF QEMU plugin\n/dev/vdb\t/opt\tauto\tdefaults,nofail\t0\t0\n' >> /etc/fstab"
 sshpass -p linux ssh -o StrictHostKeyChecking=no -p 2222 root@localhost "sed -i 's/^root:[^:]*:/root::/' /etc/shadow && sync && crinit-ctl poweroff" || true
 
 if [[ -f "${WORKING_DIR}/qemu.pid" ]]; then
