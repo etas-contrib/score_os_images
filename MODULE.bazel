@@ -98,5 +98,5 @@ http_file(
 
 bazel_dep(
     name = "score_devcontainer",
-    version = "1.11.3",
+    version = "1.11.4",
 )
