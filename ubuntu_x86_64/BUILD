@@ -11,18 +11,25 @@
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
 
+exports_files(
+    [
+        "build_image.sh",
+    ],
+    visibility = ["//visibility:public"],
+)
+
 genrule(
     name = "itf-image",
     srcs = [
         "cloud-init/meta-data",
         "cloud-init/user-data",
         "qemu_config.json",
-        "//scripts:build_ubuntu_x86_64_image.sh",
         "@ubuntu_noble_minimal_cloudimg_amd64//file",
+        "build_image.sh",
     ],
     outs = ["ubuntu-x86_64-itf/ubuntu-24.04-minimal-cloudimg-amd64.img"],
     cmd = """
-        bash $(location //scripts:build_ubuntu_x86_64_image.sh) \
+        bash $(location :build_image.sh) \
             $(RULEDIR) \
             $(location @ubuntu_noble_minimal_cloudimg_amd64//file) \
             $(RULEDIR)/ubuntu-x86_64-itf/ubuntu-24.04-minimal-cloudimg-amd64.img \

@@ -19,7 +19,7 @@ import unittest
 class QemuConfigTest(unittest.TestCase):
     def test_configs_have_required_fields(self):
         config_paths = sys.argv[1:]
-        self.assertEqual(len(config_paths), 2)
+        self.assertEqual(len(config_paths), 3)
 
         for config_path in config_paths:
             with self.subTest(config_path=config_path):

@@ -7,6 +7,9 @@
         "--privileged",
         "--device=/dev/kvm"
     ],
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker": {}
+    },
     "postStartCommand": "sudo chmod 666 /dev/kvm",
     "customizations": {
         "vscode": {

@@ -15,7 +15,7 @@
 set -euxo pipefail
 
 if [[ $# -lt 4 ]]; then
-    echo "Error: Expected at least 4 arguments (working directory, image source location, image target location, and one or more tar files to deploy relative to the root of the image)" >&2
+    echo "Error: Expected at least 4 arguments (working directory, image source location, image target location, and one or more Debian packages to install)" >&2
     exit 1
 fi
 
@@ -55,8 +55,8 @@ for src in "${DEPLOY_SRCS[@]}"; do
         echo "Error: Deploy source file does not exist: ${src}" >&2
         exit 1
     fi
-    if [[ ! "${src}" =~ \.tar(\.(gz|bz2|xz))?$ ]]; then
-        echo "Error: Deploy source is not a tar file: ${src}" >&2
+    if [[ ! "${src}" =~ \.deb$ ]]; then
+        echo "Error: Deploy source is not a Debian package: ${src}" >&2
         exit 1
     fi
 done
@@ -91,12 +91,10 @@ done
 
 for src in "${DEPLOY_SRCS[@]}"; do
     sshpass -p linux scp -rp -o StrictHostKeyChecking=no -P 2222 "${src}" root@localhost:/
-    sshpass -p linux ssh -o StrictHostKeyChecking=no -p 2222 root@localhost "tar -xf /$(basename "${src}") -C /"
+    sshpass -p linux ssh -o StrictHostKeyChecking=no -p 2222 root@localhost "dpkg -i -- /$(basename "${src}")"
     sshpass -p linux ssh -o StrictHostKeyChecking=no -p 2222 root@localhost "rm -f /$(basename "${src}")"
 done
 
-# Enable root login and empty passwords for integration testing, not for production use.
-sshpass -p linux ssh -o StrictHostKeyChecking=no -p 2222 root@localhost "printf 'PermitRootLogin yes\nPermitEmptyPasswords yes\nPasswordAuthentication yes\n' > /etc/ssh/sshd_config.d/99-integration-test.conf"
 # Mount an additional disk (ITF "--qemu-disk") on /opt. "nofail" keeps the image
 # bootable when no such disk is attached; crinit runs "mount -a" during boot.
 sshpass -p linux ssh -o StrictHostKeyChecking=no -p 2222 root@localhost "printf '\n# Additional disk attached by the ITF QEMU plugin\n/dev/vdb\t/opt\tauto\tdefaults,nofail\t0\t0\n' >> /etc/fstab"

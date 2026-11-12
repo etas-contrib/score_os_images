@@ -82,6 +82,31 @@ http_file(
 
 ###############################################################################
 #
+# EB corbos Toolkit sources used to build the aarch64 image from scratch
+#
+# Only the KAS configuration, the bundled Isar layers and the development
+# container setup are used, see //ebclfsa_aarch64.
+#
+###############################################################################
+new_git_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
+
+new_git_repository(
+    name = "eb_corbos_toolkit",
+    build_file_content = """
+exports_files(["BUILD.bazel"])
+
+filegroup(
+    name = "sources",
+    srcs = glob(["kas/**", "layers/**", ".devcontainer/**"]),
+    visibility = ["//visibility:public"],
+)
+""",
+    commit = "fe2cddbc01232e4b62accb9abab783c8ccf75ef7",  # v2.0.0-beta3
+    remote = "https://github.com/Elektrobit/eb_corbos_toolkit.git",
+)
+
+###############################################################################
+#
 # Ubuntu minimal cloud image used as base for the x86_64 QEMU image
 #
 # Pinned to a dated release directory so the download stays reproducible. The

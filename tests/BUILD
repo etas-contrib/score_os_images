@@ -20,11 +20,13 @@ py_test(
     name = "qemu_config_test",
     srcs = ["test_qemu_config.py"],
     args = [
+        "$(location //ebclfsa_aarch64_prebuild:qemu_config)",
         "$(location //ebclfsa_aarch64:qemu_config)",
         "$(location //ubuntu_x86_64:qemu_config)",
     ],
     data = [
         "//ebclfsa_aarch64:qemu_config",
+        "//ebclfsa_aarch64_prebuild:qemu_config",
         "//ubuntu_x86_64:qemu_config",
     ],
     main = "test_qemu_config.py",
@@ -84,7 +86,36 @@ py_itf_test(
         "//ebclfsa_aarch64:qemu_config",
     ],
     plugins = ["@score_itf//score/itf/plugins:qemu_plugin"],
-    tags = ["qemu-integration"],
+    # Building the image takes long, so the test only runs when selected
+    # explicitly, see .github/workflows/ebclfsa.yml.
+    tags = [
+        "manual",
+        "qemu-integration",
+    ],
+    target_compatible_with = ["@platforms//os:linux"],
+)
+
+py_itf_test(
+    name = "ebclfsa_prebuild_qemu_test",
+    srcs = [
+        "test_multicast.py",
+        "test_no_disk.py",
+        "test_ping.py",
+    ],
+    args = [
+        "--qemu-config=$(location //ebclfsa_aarch64_prebuild:qemu_config)",
+        "--qemu-kernel=$(location //ebclfsa_aarch64_prebuild:kernel)",
+        "--qemu-rootfs=$(location //ebclfsa_aarch64_prebuild:image)",
+    ],
+    data = [
+        "//ebclfsa_aarch64_prebuild:image",
+        "//ebclfsa_aarch64_prebuild:kernel",
+        "//ebclfsa_aarch64_prebuild:qemu_config",
+    ],
+    plugins = ["@score_itf//score/itf/plugins:qemu_plugin"],
+    tags = [
+        "qemu-integration",
+    ],
     target_compatible_with = ["@platforms//os:linux"],
 )
 
@@ -122,6 +153,35 @@ py_itf_test(
         "//ebclfsa_aarch64:qemu_config",
     ],
     plugins = ["@score_itf//score/itf/plugins:qemu_plugin"],
-    tags = ["qemu-integration"],
+    # Building the image takes long, so the test only runs when selected
+    # explicitly, see .github/workflows/ebclfsa.yml.
+    tags = [
+        "manual",
+        "qemu-integration",
+    ],
+    target_compatible_with = ["@platforms//os:linux"],
+)
+
+py_itf_test(
+    name = "ebclfsa_prebuild_opt_mount_qemu_test",
+    srcs = [
+        "test_opt_mount.py",
+    ],
+    args = [
+        "--qemu-config=$(location //ebclfsa_aarch64_prebuild:qemu_config)",
+        "--qemu-disk=$(location :qemu_disk_image)",
+        "--qemu-kernel=$(location //ebclfsa_aarch64_prebuild:kernel)",
+        "--qemu-rootfs=$(location //ebclfsa_aarch64_prebuild:image)",
+    ],
+    data = [
+        ":qemu_disk_image",
+        "//ebclfsa_aarch64_prebuild:image",
+        "//ebclfsa_aarch64_prebuild:kernel",
+        "//ebclfsa_aarch64_prebuild:qemu_config",
+    ],
+    plugins = ["@score_itf//score/itf/plugins:qemu_plugin"],
+    tags = [
+        "qemu-integration",
+    ],
     target_compatible_with = ["@platforms//os:linux"],
 )

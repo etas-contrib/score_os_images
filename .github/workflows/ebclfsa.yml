@@ -1,0 +1,55 @@
+# *******************************************************************************
+# Copyright (c) 2026 Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+# *******************************************************************************
+name: "EBcLfSA: Build and Test"
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    paths:
+      - ebclfsa_aarch64/**
+      - tests/**
+      - MODULE.bazel
+      - .github/workflows/ebclfsa_from_scratch_build.yml
+  workflow_dispatch:
+# Building the image takes long, do not keep outdated runs of a PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - name: Clean disk space
+        uses: eclipse-score/more-disk-space@v1
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      - name: Setup Bazel
+        uses: bazel-contrib/setup-bazel@0.19.1
+      - name: Install qemu
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-arm
+      - name: Enable KVM group perms
+        run: |
+          sudo chmod 666 /dev/kvm
+      - name: Allow unprivileged user namespaces
+        run: |
+          sudo sysctl kernel.apparmor_restrict_unprivileged_userns=0
+      - name: Build EBcLfSA image from scratch
+        run: |
+          bazel build //ebclfsa_aarch64:image //ebclfsa_aarch64:kernel
+      - name: Run QEMU integration tests
+        run: |
+          bazel test --config=qemu-integration //tests:ebclfsa_qemu_test //tests:ebclfsa_qemu_opt_mount_test
