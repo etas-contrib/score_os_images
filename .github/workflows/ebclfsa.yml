@@ -18,7 +18,7 @@ on:
       - ebclfsa_aarch64/**
       - tests/**
       - MODULE.bazel
-      - .github/workflows/ebclfsa_from_scratch_build.yml
+      - .github/workflows/ebclfsa.yml
   workflow_dispatch:
 # Building the image takes long, do not keep outdated runs of a PR.
 concurrency:

@@ -14,6 +14,25 @@
 
 set -euo pipefail
 
+machine=ebcl-qemuarm64
+release=false
+if [[ ${1:-} == --release ]]; then
+    if [[ $# -lt 5 ]]; then
+        echo "Usage: $0 --release MACHINE TOOLKIT_SOURCE_DIR KAS_CONFIG OUTPUT_DIR [PACKAGE_DEB ...]" >&2
+        exit 1
+    fi
+    machine=$2
+    case "$machine" in
+        ebcl-qemuarm64|rpi4b) ;;
+        *)
+            echo "Error: unsupported release machine: $machine" >&2
+            exit 1
+            ;;
+    esac
+    release=true
+    shift 2
+fi
+
 if [[ $# -lt 3 ]]; then
     echo "Usage: $0 TOOLKIT_SOURCE_DIR KAS_CONFIG OUTPUT_DIR [PACKAGE_DEB ...]" >&2
     exit 1
@@ -60,7 +79,7 @@ LICENSE = "CLOSED"
 inherit dpkg-prebuilt
 
 SRC_URI = "file://$name.deb"
-COMPATIBLE_MACHINE = "ebcl-qemuarm64"
+COMPATIBLE_MACHINE = "$machine"
 EOF
     package_names+=("$name")
 done
@@ -72,6 +91,30 @@ local_conf_header:
   score_packages: |
     IMAGE_INSTALL:append = " ${package_names[*]}"
 EOF
+
+cat > "$work/kas/score-target.yml" <<EOF
+header:
+  version: 18
+machine: "$machine"
+target:
+  - "score-image"
+EOF
+if [[ "$release" == true ]]; then
+    echo '  - "score-image-sdk"' >> "$work/kas/score-target.yml"
+fi
+if [[ "$machine" == rpi4b ]]; then
+    cat > "$work/kas/score-bsp.yml" <<EOF
+header:
+  version: 18
+  includes:
+    - "kas/machines/public/rpi4b.yml"
+EOF
+else
+    cat > "$work/kas/score-bsp.yml" <<EOF
+header:
+  version: 18
+EOF
+fi
 
 # Match the toolkit's v18 container, pinned independently of its mutable tag.
 container=ghcr.io/elektrobit/eb-corbos-toolkit-devcontainer-amd64@sha256:10f487469c03fb2b5be1c804ec0b0c911d3903a9dd9a8fcbb8b8f401d43b158c
@@ -106,14 +149,33 @@ DOCKER_CONFIG="$work/.docker" docker run --rm --init --privileged --user root \
         # patch sources are not shipped.
         runuser -u developer -- kas build \
             --skip repos_checkout --skip repos_apply_patches \
-            kas/references/public.yml:kas/score.yml:kas/score-packages.yml
+            kas/references/public.yml:kas/score-bsp.yml:kas/score.yml:kas/score-packages.yml:kas/score-target.yml
     ' bash "$(id -u)" "$(id -g)"
 
-deploy="$work/build/tmp/deploy/images/ebcl-qemuarm64"
-for artifact in score-image-trixie-ebclfsa-ebcl-qemuarm64{.wic,-vmlinux}; do
+deploy="$work/build/tmp/deploy/images/$machine"
+image="score-image-trixie-ebclfsa-$machine"
+sdk="score-image-sdk-trixie-ebclfsa-$machine"
+artifacts=("$image.wic" "$image-vmlinux")
+if [[ "$release" == true ]]; then
+    artifacts+=("$image.spdx.json" "$image-ssh-target-key" "$sdk.tar.gz" "$sdk.spdx.json")
+fi
+for artifact in "${artifacts[@]}"; do
     if [[ ! -f "$deploy/$artifact" ]]; then
         echo "Error: KAS did not produce the expected artifact: $deploy/$artifact" >&2
         exit 1
     fi
-    cp --sparse=always -L "$deploy/$artifact" "$output/$artifact"
+    if [[ "$release" == false ]]; then
+        cp --sparse=always -L "$deploy/$artifact" "$output/$artifact"
+    fi
 done
+
+if [[ "$release" == true ]]; then
+    # Publish only the development login key, never SSH server host keys.
+    tar --sparse -czf "$output/$image.tar.gz" -C "$deploy" \
+        "$image.wic" "$image-vmlinux" "$image.spdx.json" "$image-ssh-target-key"
+    cp -L "$deploy/$sdk.tar.gz" "$deploy/$sdk.spdx.json" "$output/"
+    (
+        cd "$output"
+        sha256sum "$image.tar.gz" "$sdk.tar.gz" "$sdk.spdx.json" > "$image.sha256"
+    )
+fi

@@ -1,0 +1,79 @@
+# *******************************************************************************
+# Copyright (c) 2026 Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+# *******************************************************************************
+name: "EBcLfSA: Release Images and SDKs"
+on:
+  release:
+    types: [published]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash --noprofile --norc -euo pipefail {0}
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix:
+        machine: [ebcl-qemuarm64, rpi4b]
+    steps:
+      - name: Clean disk space
+        uses: eclipse-score/more-disk-space@v1
+      - name: Checkout release
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          persist-credentials: false
+      - name: Setup Bazel
+        uses: bazel-contrib/setup-bazel@0.19.1
+      - name: Test image build script
+        run: bash ebclfsa_aarch64/build_image_test.sh
+      - name: Allow unprivileged user namespaces
+        run: sudo sysctl kernel.apparmor_restrict_unprivileged_userns=0
+      - name: Build image and matching SDK
+        env:
+          MACHINE: ${{ matrix.machine }}
+        run: bazel build "//ebclfsa_aarch64:release-$MACHINE"
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: ebclfsa-release-${{ matrix.machine }}
+          path: bazel-bin/ebclfsa_aarch64/release/${{ matrix.machine }}/*
+          if-no-files-found: error
+          compression-level: 0
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Download release artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: ebclfsa-release-*
+          merge-multiple: true
+          path: release-assets
+      - name: Verify and publish release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          cd release-assets
+          for machine in ebcl-qemuarm64 rpi4b; do
+            sha256sum --check "score-image-trixie-ebclfsa-$machine.sha256"
+          done
+          gh release upload "$RELEASE_TAG" ./* --repo "$GITHUB_REPOSITORY" --clobber

@@ -123,3 +123,41 @@ filegroup(
     srcs = ["qemu_config.json"],
     visibility = ["//visibility:public"],
 )
+
+[
+    genrule(
+        name = "release-" + machine,
+        srcs = [
+            "kas.yml",
+            "@eb_corbos_toolkit//:BUILD.bazel",
+            "@eb_corbos_toolkit//:sources",
+        ] + IMAGE_PACKAGES + glob(["meta-score/**"]),
+        outs = [
+            "release/%s/score-image-trixie-ebclfsa-%s.tar.gz" % (machine, machine),
+            "release/%s/score-image-sdk-trixie-ebclfsa-%s.tar.gz" % (machine, machine),
+            "release/%s/score-image-sdk-trixie-ebclfsa-%s.spdx.json" % (machine, machine),
+            "release/%s/score-image-trixie-ebclfsa-%s.sha256" % (machine, machine),
+        ],
+        cmd = "mkdir -p $(RULEDIR)/release/" + machine + " && " +
+              "bash $(location build_image.sh) --release " + machine + " " +
+              "$$(dirname $(location @eb_corbos_toolkit//:BUILD.bazel)) " +
+              "$(location kas.yml) " +
+              "$(RULEDIR)/release/" + machine + " " +
+              " ".join(["\"$(location %s)\"" % package for package in IMAGE_PACKAGES]),
+        local = True,
+        tags = ["manual"],
+        tools = ["build_image.sh"],
+        visibility = ["//visibility:public"],
+    )
+    for machine in [
+        "ebcl-qemuarm64",
+        "rpi4b",
+    ]
+]
+
+sh_test(
+    name = "build_image_test",
+    srcs = ["build_image_test.sh"],
+    data = [":build_image.sh"],
+    visibility = ["//visibility:private"],
+)

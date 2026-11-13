@@ -89,7 +89,8 @@ WIC_CREATE_EXTRA_ARGS:append = " --no-fstab-update"
 # Allow passwordless root login for integration testing, not for production use.
 # Appended so it runs after image_postprocess_accounts, which sets the toolkit's
 # default root password.
-ROOTFS_POSTPROCESS_COMMAND:append = " score_passwordless_root score_opt_mount"
+ROOTFS_POSTPROCESS_COMMAND:append = " score_passwordless_root ${@'score_opt_mount' if d.getVar('MACHINE') == 'ebcl-qemuarm64' else ''}"
+ROOTFS_POSTPROCESS_COMMAND:remove:class-sdk = "score_passwordless_root score_opt_mount"
 
 score_passwordless_root() {
     sudo sed -i 's/^root:[^:]*:/root::/' '${ROOTFSDIR}/etc/shadow'
