@@ -14,20 +14,16 @@
 
 set -euxo pipefail
 
-if [[ $# -lt 4 ]]; then
-    echo "Error: Expected at least 4 arguments (working directory, image source location, image target location, and one or more Debian packages to install)" >&2
-    exit 1
-fi
-
-if ! command -v sshpass &> /dev/null; then
-    echo "Error: sshpass is not installed. Please install it to proceed." >&2
+if [[ $# -lt 5 ]]; then
+    echo "Error: Expected at least 5 arguments (working directory, image source location, image target location, SSH target key, and one or more Debian packages to install)" >&2
     exit 1
 fi
 
 WORKING_DIR="$1"
 IMAGE_SOURCE="$2"
 IMAGE_TARGET="$3"
-shift 3
+SSH_TARGET_KEY="$4"
+shift 4
 DEPLOY_SRCS=("$@")
 
 if [[ ! -d "${IMAGE_SOURCE}" ]]; then
@@ -47,6 +43,11 @@ fi
 
 if [[ -e "${IMAGE_TARGET}" && ! -d "${IMAGE_TARGET}" ]]; then
     echo "Error: Image target location exists but is not a directory: ${IMAGE_TARGET}" >&2
+    exit 1
+fi
+
+if [[ ! -f "${SSH_TARGET_KEY}" ]]; then
+    echo "Error: SSH target key does not exist: ${SSH_TARGET_KEY}" >&2
     exit 1
 fi
 
@@ -71,6 +72,18 @@ KERNEL=$(find "${IMAGE_TARGET}" -maxdepth 1 \( -name "*vmlinux" -type f -o -name
 # The image file must be writable for qemu overlay handling.
 chmod +w "${IMAGE}"
 
+SSH_KEY="$(mktemp)"
+trap 'rm -f -- "${SSH_KEY}"' EXIT
+cat "${SSH_TARGET_KEY}" > "${SSH_KEY}"
+SSH_OPTIONS=(
+    -i "${SSH_KEY}"
+    -o IdentitiesOnly=yes
+    -o BatchMode=yes
+    -o PasswordAuthentication=no
+    -o KbdInteractiveAuthentication=no
+    -o StrictHostKeyChecking=no
+)
+
 qemu-system-aarch64 -m 2048 -cpu cortex-a53 \
     -kernel "${KERNEL}" \
     -machine "virt,virtualization=true,gic-version=3" \
@@ -83,22 +96,24 @@ qemu-system-aarch64 -m 2048 -cpu cortex-a53 \
     -nographic > "${WORKING_DIR}/qemu_deployment.log" &
 
 for _ in {1..60}; do
-    if sshpass -p linux ssh -o StrictHostKeyChecking=no -o ConnectTimeout=1 -p 2222 root@localhost true 2>/dev/null; then
+    if ssh "${SSH_OPTIONS[@]}" -o ConnectTimeout=1 -p 2222 root@localhost true 2>/dev/null; then
         break
     fi
     sleep 1
 done
 
 for src in "${DEPLOY_SRCS[@]}"; do
-    sshpass -p linux scp -rp -o StrictHostKeyChecking=no -P 2222 "${src}" root@localhost:/
-    sshpass -p linux ssh -o StrictHostKeyChecking=no -p 2222 root@localhost "dpkg -i -- /$(basename "${src}")"
-    sshpass -p linux ssh -o StrictHostKeyChecking=no -p 2222 root@localhost "rm -f /$(basename "${src}")"
+    scp -rp "${SSH_OPTIONS[@]}" -P 2222 "${src}" root@localhost:/
+    ssh "${SSH_OPTIONS[@]}" -p 2222 root@localhost "dpkg -i -- /$(basename "${src}")"
+    ssh "${SSH_OPTIONS[@]}" -p 2222 root@localhost "rm -f /$(basename "${src}")"
 done
+
+ssh "${SSH_OPTIONS[@]}" -p 2222 root@localhost "passwd -l root"
 
 # Mount an additional disk (ITF "--qemu-disk") on /opt. "nofail" keeps the image
 # bootable when no such disk is attached; crinit runs "mount -a" during boot.
-sshpass -p linux ssh -o StrictHostKeyChecking=no -p 2222 root@localhost "printf '\n# Additional disk attached by the ITF QEMU plugin\n/dev/vdb\t/opt\tauto\tdefaults,nofail\t0\t0\n' >> /etc/fstab"
-sshpass -p linux ssh -o StrictHostKeyChecking=no -p 2222 root@localhost "sed -i 's/^root:[^:]*:/root::/' /etc/shadow && sync && crinit-ctl poweroff" || true
+ssh "${SSH_OPTIONS[@]}" -p 2222 root@localhost "printf '\n# Additional disk attached by the ITF QEMU plugin\n/dev/vdb\t/opt\tauto\tdefaults,nofail\t0\t0\n' >> /etc/fstab"
+ssh "${SSH_OPTIONS[@]}" -p 2222 root@localhost "sync && crinit-ctl poweroff" || true
 
 if [[ -f "${WORKING_DIR}/qemu.pid" ]]; then
     wait "$(cat "${WORKING_DIR}/qemu.pid")" 2>/dev/null || true

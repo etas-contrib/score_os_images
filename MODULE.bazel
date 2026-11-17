@@ -33,18 +33,11 @@ bazel_dep(
 # Rules used by the QEMU image definitions
 bazel_dep(name = "platforms", version = "1.1.0", dev_dependency = True)
 
-bazel_dep(name = "rules_pkg", version = "1.0.1")
+bazel_dep(name = "rules_pkg", version = "1.2.0")
 
 # QEMU integration test framework
-bazel_dep(name = "score_itf", version = "0.5.0", dev_dependency = True)
+bazel_dep(name = "score_itf", version = "0.7.0", dev_dependency = True)
 bazel_dep(name = "rules_python", version = "1.9.0", dev_dependency = True)
-
-# TODO: Switch back to a released version once `--qemu-disk` is part of a tagged release.
-git_override(
-    module_name = "score_itf",
-    commit = "38ae9a3dd98ccc7434e1f8b57ca4a3d2bac82e2f",
-    remote = "https://github.com/eclipse-score/itf.git",
-)
 
 # Filesystem image rules, used to build the additional disk image attached to the
 # QEMU targets via `--qemu-disk`.
@@ -78,6 +71,13 @@ http_file(
     downloaded_file_path = "fastdev-ubuntu-ebclfsa-ebcl-qemuarm64.tar.gz",
     sha256 = "d84ffd33210a71a2fdd478fa25df3775f873a83d2fe158b56c5ed37da4265823",
     urls = ["https://github.com/elektrobit/eb_corbos_toolkit/releases/download/v2.0.0-beta3/fastdev-trixie-ebclfsa-ebcl-qemuarm64.tar.gz"],
+)
+
+http_file(
+    name = "eb_corbos_toolkit_target_key",
+    downloaded_file_path = "fastdev-trixie-ebclfsa-ebcl-qemuarm64-ssh-target-key",
+    sha256 = "fe7f6ed1e3eb1c65b5f6702edb3b931695d0b70c8c65ede6d1e8475fbd52265f",
+    urls = ["https://github.com/elektrobit/eb_corbos_toolkit/releases/download/v2.0.0-beta3/fastdev-trixie-ebclfsa-ebcl-qemuarm64-ssh-target-key"],
 )
 
 ###############################################################################

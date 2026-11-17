@@ -80,9 +80,10 @@ export test_machine=ebcl-qemuarm64 test_release=false
 mkdir "$fixture/legacy"
 bash "$script" "$fixture/toolkit" "$fixture/source/kas.yml" \
     "$fixture/legacy" "$fixture/score-test.deb"
-[[ $(find "$fixture/legacy" -type f | wc -l) == 2 ]]
+[[ $(find "$fixture/legacy" -type f | wc -l) == 3 ]]
 [[ -f "$fixture/legacy/score-image-trixie-ebclfsa-ebcl-qemuarm64.wic" ]]
 [[ -f "$fixture/legacy/score-image-trixie-ebclfsa-ebcl-qemuarm64-vmlinux" ]]
+[[ -f "$fixture/legacy/score-image-trixie-ebclfsa-ebcl-qemuarm64-ssh-target-key" ]]
 
 export test_release=true
 for test_machine in ebcl-qemuarm64 rpi4b; do

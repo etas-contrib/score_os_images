@@ -86,14 +86,15 @@ UNWANTED_PKGS = " \
 # Do not update fstab when creating wic images
 WIC_CREATE_EXTRA_ARGS:append = " --no-fstab-update"
 
-# Allow passwordless root login for integration testing, not for production use.
-# Appended so it runs after image_postprocess_accounts, which sets the toolkit's
-# default root password.
-ROOTFS_POSTPROCESS_COMMAND:append = " score_passwordless_root ${@'score_opt_mount' if d.getVar('MACHINE') == 'ebcl-qemuarm64' else ''}"
-ROOTFS_POSTPROCESS_COMMAND:remove:class-sdk = "score_passwordless_root score_opt_mount"
+# Generate a development key using the toolkit's SSH target access support.
+EBCL_SSH_TARGET_ACCESS = "1"
 
-score_passwordless_root() {
-    sudo sed -i 's/^root:[^:]*:/root::/' '${ROOTFSDIR}/etc/shadow'
+# Run after image_postprocess_accounts sets the toolkit's default root password.
+ROOTFS_POSTPROCESS_COMMAND:append = " score_lock_root ${@'score_opt_mount' if d.getVar('MACHINE') == 'ebcl-qemuarm64' else ''}"
+ROOTFS_POSTPROCESS_COMMAND:remove:class-sdk = "score_lock_root score_opt_mount"
+
+score_lock_root() {
+    sudo chroot '${ROOTFSDIR}' passwd -l root
 }
 
 score_opt_mount() {

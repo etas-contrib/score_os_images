@@ -16,8 +16,8 @@
 # ITF QEMU plugin.
 #
 # The image is booted exactly once with a cloud-init NoCloud seed image attached.
-# cloud-init applies the configuration from a rendered cloud-init/user-data
-# derived from qemu_config.json, then powers the machine off again, so this
+# cloud-init applies the configuration from user-data rendered with the
+# generated SSH public key, then powers the machine off again, so this
 # script simply has to wait for QEMU to exit.
 #
 # Usage: build_image.sh <working dir> <source image> <target image> <user-data> <meta-data> <qemu-config>

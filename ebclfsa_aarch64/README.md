@@ -30,14 +30,14 @@ $ bazel build //ebclfsa_aarch64:image //ebclfsa_aarch64:kernel
 ```
 
 The build takes a long time, so all image targets are tagged `manual` and are
-only built when selected explicitly. The kernel and `.wic` disk image are written
-to `bazel-bin/ebclfsa_aarch64/`.
+only built when selected explicitly.
 
 | Target | Content |
 | --- | --- |
 | `:image` | The `.wic` disk image |
 | `:kernel` | The kernel required to boot the image |
-| `:qemu_config` | QEMU configuration shared with `//ebclfsa_aarch64_prebuild` |
+| `:qemu_config` | Generated QEMU configuration with the image's SSH key path |
+| `:ssh_target_key` | Development private key generated with the image |
 | `:network_config_deb` | The `score-network-config` Debian package |
 
 ## Requirements
@@ -62,25 +62,7 @@ address `169.254.158.190/16` on `eth0`, gateway `169.254.21.88`, and a multicast
 route. The file is packaged as `score-network-config`, which [kas.yml](kas.yml)
 selects through `EBCLFSA_FASTDEV_NETWORK_CONFIG` in place of the toolkit's
 `ebclfsa-fastdev-network` package. It therefore matches the addresses in
-[`qemu_config.json`](qemu_config.json).
-
-## Root SSH login
-
-Like `//ebclfsa_aarch64_prebuild:image`, the image permits passwordless root SSH login for
-integration testing. It must never be used in production.
-
-- The `score-itf-sshd-config` package installs
-  [`99-integration-test.conf`](sshd-config/99-integration-test.conf) into
-  `/etc/ssh/sshd_config.d`.
-- [`score-image_1.0.bb`](meta-score/recipes-images/score-image/score-image_1.0.bb)
-  clears the root password at the end of the rootfs post-processing, after the
-  toolkit has set its default password `linux`.
-
-## /opt mount
-
-A secondary disk image can be attached to the QEMU targets via the `--qemu-disk` option, in which case it is mounted on `/opt` inside the guest.
-The image recipe adds `/dev/vdb` to `/etc/fstab` with `nofail`, so the image
-also boots when no secondary disk is attached.
+[`qemu_config.template.json`](qemu_config.template.json).
 
 ## Selecting packages
 
@@ -104,7 +86,7 @@ the same list.
 
 ## Tests
 
-The ping, multicast and no-disk QEMU integration tests boot the image with
+The ping, multicast, SSH authentication and no-disk QEMU integration tests boot the image with
 `:qemu_config`. The test is tagged `manual`, so
 `bazel test --config=qemu-integration //tests/...` does not build this image:
 
@@ -154,7 +136,7 @@ $ ssh -o IdentitiesOnly=yes -i score-image-trixie-ebclfsa-ebcl-qemuarm64-ssh-tar
 ```
 
 For Raspberry Pi, use the `rpi4b` key instead and the device's reachable IP
-address. Key-based login remains available if passwordless login is removed.
+address. Key-based login is the only means to login via SSH.
 These keys are deliberately public development credentials: anyone downloading
 the release can log in as root on a reachable image. Use only on isolated test
 networks, never reuse the keys elsewhere, and replace the authorized key and

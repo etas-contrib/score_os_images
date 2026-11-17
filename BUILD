@@ -27,6 +27,7 @@ copyright_checker(
         "autosd",
         "ebclfsa_aarch64",
         "ebclfsa_aarch64_prebuild",
+        "qemu_config.bzl",
         "tests",
         "ubuntu_x86_64",
     ],

@@ -11,6 +11,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
 
+load("//:qemu_config.bzl", "qemu_config")
+
 exports_files(
     [
         "build_image.sh",
@@ -42,6 +44,7 @@ genrule(
     name = "itf-image",
     srcs = [
         ":extract-fastdev-image",
+        ":ssh_target_key",
         "build_image.sh",
     ] + IMAGE_PACKAGES,
     outs = [
@@ -53,6 +56,7 @@ genrule(
             $(RULEDIR) \
             $(RULEDIR)/ebcl-qemuarm64 \
             $(RULEDIR)/ebcl-qemuarm64-itf \
+            $(location :ssh_target_key) \
             $(location //ebclfsa_aarch64:network_config_deb) \
             $(location //ebclfsa_aarch64:sshd_config_deb)
     """,
@@ -90,7 +94,15 @@ filegroup(
 )
 
 filegroup(
+    name = "ssh_target_key",
+    srcs = ["@eb_corbos_toolkit_target_key//file"],
+    visibility = ["//visibility:public"],
+)
+
+qemu_config(
     name = "qemu_config",
-    srcs = ["//ebclfsa_aarch64:qemu_config.json"],
+    out = "qemu_config.json",
+    key = ":ssh_target_key",
+    template = "//ebclfsa_aarch64:qemu_config.template.json",
     visibility = ["//visibility:public"],
 )

@@ -155,9 +155,9 @@ DOCKER_CONFIG="$work/.docker" docker run --rm --init --privileged --user root \
 deploy="$work/build/tmp/deploy/images/$machine"
 image="score-image-trixie-ebclfsa-$machine"
 sdk="score-image-sdk-trixie-ebclfsa-$machine"
-artifacts=("$image.wic" "$image-vmlinux")
+artifacts=("$image.wic" "$image-vmlinux" "$image-ssh-target-key")
 if [[ "$release" == true ]]; then
-    artifacts+=("$image.spdx.json" "$image-ssh-target-key" "$sdk.tar.gz" "$sdk.spdx.json")
+    artifacts+=("$image.spdx.json" "$sdk.tar.gz" "$sdk.spdx.json")
 fi
 for artifact in "${artifacts[@]}"; do
     if [[ ! -f "$deploy/$artifact" ]]; then
