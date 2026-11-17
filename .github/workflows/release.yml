@@ -39,7 +39,7 @@ jobs:
           ref: ${{ github.event.release.tag_name }}
           persist-credentials: false
       - name: Setup Bazel
-        uses: bazel-contrib/setup-bazel@0.19.1
+        uses: bazel-contrib/setup-bazel@0.19.2
       - name: Test image build script
         run: bash ebclfsa_aarch64/build_image_test.sh
       - name: Allow unprivileged user namespaces
