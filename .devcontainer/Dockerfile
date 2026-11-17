@@ -12,6 +12,6 @@
 # *******************************************************************************
 
 # Use Dockerfile to get dependabot version bumps after new image is released
-FROM ghcr.io/eclipse-score/devcontainer:v1.12.0
+FROM ghcr.io/eclipse-score/devcontainer:v1.13.0
 
 RUN apt-get update && apt-get install -y iputils-ping cloud-image-utils
