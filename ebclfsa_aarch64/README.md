@@ -59,8 +59,10 @@ remote executor.
 The image uses the same network configuration as `//ebclfsa_aarch64_prebuild`
 ([`network`](config-overlay/etc/config/network)): static
 address `169.254.158.190/16` on `eth0`, gateway `169.254.21.88`, and a multicast
-route. The file is packaged as `score-network-config`, which [kas.yml](kas.yml)
-selects through `EBCLFSA_FASTDEV_NETWORK_CONFIG` in place of the toolkit's
+route. It also acquires an IPv4 address via DHCP on the same interface, and
+prefers a DHCP-provided default gateway when available. The file is packaged as
+`score-network-config`, which [kas.yml](kas.yml) selects through
+`EBCLFSA_FASTDEV_NETWORK_CONFIG` in place of the toolkit's
 `ebclfsa-fastdev-network` package. It therefore matches the addresses in
 [`qemu_config.template.json`](qemu_config.template.json).
 
@@ -86,12 +88,12 @@ the same list.
 
 ## Tests
 
-The ping, multicast, SSH authentication and no-disk QEMU integration tests boot the image with
-`:qemu_config`. The test is tagged `manual`, so
+The ping, multicast, SSH authentication, no-disk, and DHCP QEMU integration
+tests are tagged `manual`, so
 `bazel test --config=qemu-integration //tests/...` does not build this image:
 
 ```console
-$ bazel test --config=qemu-integration //tests:ebclfsa_qemu_test //tests:ebclfsa_qemu_opt_mount_test
+$ bazel test --config=qemu-integration //tests:ebclfsa_aarch64_qemu_tests
 ```
 
 The [EBcLfSA workflow](../.github/workflows/ebclfsa.yml)

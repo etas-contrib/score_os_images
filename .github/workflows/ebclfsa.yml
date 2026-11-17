@@ -52,4 +52,4 @@ jobs:
           bazel build //ebclfsa_aarch64:image //ebclfsa_aarch64:kernel
       - name: Run QEMU integration tests
         run: |
-          bazel test --config=qemu-integration //tests:ebclfsa_qemu_test //tests:ebclfsa_qemu_opt_mount_test
+          bazel test --config=qemu-integration //tests:ebclfsa_aarch64_qemu_tests

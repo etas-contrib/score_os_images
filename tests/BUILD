@@ -16,6 +16,74 @@ load("@rules_python//python:defs.bzl", "py_test")
 load("@score_itf//:defs.bzl", "py_itf_test")
 load("@score_rules_imagefs//rules/linux:ext4.bzl", "ext4")
 
+test_suite(
+    name = "ebclfsa_aarch64_qemu_tests",
+    tags = ["manual"],
+    tests = [
+        ":ebclfsa_dhcp_qemu_test",
+        ":ebclfsa_qemu_opt_mount_test",
+        ":ebclfsa_qemu_test",
+    ],
+)
+
+sh_test(
+    name = "ebclfsa_prebuild_dhcp_qemu_test",
+    timeout = "long",
+    srcs = ["test_dhcp.sh"],
+    args = [
+        "aarch64",
+        "$(location //ebclfsa_aarch64_prebuild:image)",
+        "$(location //ebclfsa_aarch64_prebuild:ssh_target_key)",
+        "$(location //ebclfsa_aarch64_prebuild:kernel)",
+    ],
+    data = [
+        "//ebclfsa_aarch64_prebuild:image",
+        "//ebclfsa_aarch64_prebuild:kernel",
+        "//ebclfsa_aarch64_prebuild:ssh_target_key",
+    ],
+    tags = ["qemu-integration"],
+    target_compatible_with = ["@platforms//os:linux"],
+)
+
+sh_test(
+    name = "ubuntu_dhcp_qemu_test",
+    timeout = "long",
+    srcs = ["test_dhcp.sh"],
+    args = [
+        "x86_64",
+        "$(location //ubuntu_x86_64:image)",
+        "$(location //ubuntu_x86_64:ssh_target_key)",
+    ],
+    data = [
+        "//ubuntu_x86_64:image",
+        "//ubuntu_x86_64:ssh_target_key",
+    ],
+    tags = ["qemu-integration"],
+    target_compatible_with = ["@platforms//os:linux"],
+)
+
+sh_test(
+    name = "ebclfsa_dhcp_qemu_test",
+    timeout = "long",
+    srcs = ["test_dhcp.sh"],
+    args = [
+        "aarch64",
+        "$(location //ebclfsa_aarch64:image)",
+        "$(location //ebclfsa_aarch64:ssh_target_key)",
+        "$(location //ebclfsa_aarch64:kernel)",
+    ],
+    data = [
+        "//ebclfsa_aarch64:image",
+        "//ebclfsa_aarch64:kernel",
+        "//ebclfsa_aarch64:ssh_target_key",
+    ],
+    tags = [
+        "manual",
+        "qemu-integration",
+    ],
+    target_compatible_with = ["@platforms//os:linux"],
+)
+
 py_test(
     name = "qemu_config_test",
     srcs = ["test_qemu_config.py"],

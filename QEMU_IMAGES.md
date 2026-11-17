@@ -44,6 +44,14 @@ data = [
 ]
 ```
 
+## Networking
+
+The primary network interface keeps the static `169.254.158.190/16` address
+used by the ITF QEMU configuration and also requests an IPv4 address via DHCP.
+When a DHCP server supplies a default gateway, it takes precedence over the
+static `169.254.21.88` gateway. Without DHCP, the static configuration remains
+available for the ITF tap network.
+
 ## Additional disk on /opt
 
 Images mount an additional and optional disk automatically on `/opt`. The ITF QEMU
@@ -95,7 +103,7 @@ Building the images requires KVM or falls back to slow TCG emulation.
 
 ## Testing
 
-Run the image boot and bidirectional ping tests with:
+Run the image boot, DHCP, and bidirectional ping tests with:
 
 ```console
 $ bazel test --config=qemu-integration //tests/...
