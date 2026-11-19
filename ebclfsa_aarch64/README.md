@@ -20,8 +20,7 @@ without `ebclfsa-comfwdlib-sim` or `ebclfsa-li-demo`.
 It retains `ebclfsa-hi-cflinit` and its mandatory `ebclfsa-hi-demo` application
 for booting with the shared QEMU configuration.
 [kas.yml](kas.yml) selects it instead of `fastdev`.
-Unlike [`//ebclfsa_aarch64_prebuild`](../ebclfsa_aarch64_prebuild),
-it neither downloads nor boots the toolkit's prebuilt disk image. The toolkit
+It neither downloads nor boots a prebuilt disk image. The toolkit
 still supplies precompiled system packages, including the kernel; this is an
 image build from packages, not a source rebuild of the entire OS.
 
@@ -56,7 +55,7 @@ remote executor.
 
 ## Network configuration
 
-The image uses the same network configuration as `//ebclfsa_aarch64_prebuild`
+The image uses the network configuration
 ([`network`](config-overlay/etc/config/network)): static
 address `169.254.158.190/16` on `eth0`, gateway `169.254.21.88`, and a multicast
 route. It also acquires an IPv4 address via DHCP on the same interface, and

@@ -13,6 +13,7 @@
 
 load("@rules_pkg//pkg:deb.bzl", "pkg_deb")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load("//:qemu_config.bzl", "qemu_config")
 
 # Debian packages installed in addition to the score-image recipe's packages.

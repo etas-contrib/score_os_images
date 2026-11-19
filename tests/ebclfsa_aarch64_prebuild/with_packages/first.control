@@ -1,0 +1,5 @@
+Package: external-first-test
+Version: 1.0
+Architecture: all
+Maintainer: Test <test@example.com>
+Description: First package supplied by an external macro consumer

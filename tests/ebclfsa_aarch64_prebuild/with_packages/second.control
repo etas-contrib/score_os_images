@@ -1,0 +1,5 @@
+Package: external-second-test
+Version: 1.0
+Architecture: all
+Maintainer: Test <test@example.com>
+Description: Second package supplied by an external macro consumer
