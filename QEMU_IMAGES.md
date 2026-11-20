@@ -96,20 +96,20 @@ The key may be omitted when the macro is given an explicit `ssh_target_key`.
 
 ## Usage from another Bazel module
 
-Add `os_images` to the consumer's `MODULE.bazel`, selecting a published version
+Add `score_os_images` to the consumer's `MODULE.bazel`, selecting a published version
 that contains the image targets and macro described below. The ITF test examples
 also require a direct dependency on `score_itf`:
 
 ```starlark
 # MODULE.bazel
-bazel_dep(name = "os_images", version = "<os_images_version>")
+bazel_dep(name = "score_os_images", version = "<score_os_images_version>")
 bazel_dep(name = "score_itf", version = "<score_itf_version>")
 ```
 
 ### EBcLfSA aarch64
 
 Pin the release archive independently in the consumer's `MODULE.bazel`. This
-keeps the large base image version choice independent of the `os_images`
+keeps the large base image version choice independent of the `score_os_images`
 module version and makes the download reproducible. For example, using the
 QEMU release archive pinned by this repository:
 
@@ -121,14 +121,14 @@ http_file(
     name = "ebclfsa_release_archive",
     downloaded_file_path = "score-image-trixie-ebclfsa-ebcl-qemuarm64.tar.gz",
     sha256 = "<hash>",
-    urls = ["https://github.com/eclipse-score/os_images/releases/download/<os_images_version>/score-image-trixie-ebclfsa-ebcl-qemuarm64.tar.gz"],
+    urls = ["https://github.com/eclipse-score/os_images/releases/download/<score_os_images_version>/score-image-trixie-ebclfsa-ebcl-qemuarm64.tar.gz"],
 )
 ```
 
 Instantiate the macro in a consumer package, for example `qemu/BUILD.bazel`:
 
 ```starlark
-load("@os_images//ebclfsa_aarch64_prebuild:defs.bzl", "ebclfsa_aarch64_prebuild")
+load("@score_os_images//ebclfsa_aarch64_prebuild:defs.bzl", "ebclfsa_aarch64_prebuild")
 
 ebclfsa_aarch64_prebuild(
     base_image = "@ebclfsa_release_archive//file",
@@ -168,14 +168,14 @@ py_itf_test(
 )
 ```
 
-Alternatively, use `@os_images//ebclfsa_aarch64:image`,
-`@os_images//ebclfsa_aarch64:kernel`, `@os_images//ebclfsa_aarch64:qemu_config`,
-and `@os_images//ebclfsa_aarch64:ssh_target_key` to build the EBcLfSA image
+Alternatively, use `@score_os_images//ebclfsa_aarch64:image`,
+`@score_os_images//ebclfsa_aarch64:kernel`, `@score_os_images//ebclfsa_aarch64:qemu_config`,
+and `@score_os_images//ebclfsa_aarch64:ssh_target_key` to build the EBcLfSA image
 from scratch; see the [build requirements](./ebclfsa_aarch64/README.md#requirements).
 
 ### Ubuntu x86_64
 
-The Ubuntu targets can be referenced directly; `os_images` pins the underlying
+The Ubuntu targets can be referenced directly; `score_os_images` pins the underlying
 cloud image in its own module. No archive declaration or image macro is needed
 in the consumer:
 
@@ -187,13 +187,13 @@ py_itf_test(
     name = "ubuntu_test",
     srcs = ["test_example.py"],
     args = [
-        "--qemu-config=$(location @os_images//ubuntu_x86_64:qemu_config)",
-        "--qemu-rootfs=$(location @os_images//ubuntu_x86_64:image)",
+        "--qemu-config=$(location @score_os_images//ubuntu_x86_64:qemu_config)",
+        "--qemu-rootfs=$(location @score_os_images//ubuntu_x86_64:image)",
     ],
     data = [
-        "@os_images//ubuntu_x86_64:image",
-        "@os_images//ubuntu_x86_64:qemu_config",
-        "@os_images//ubuntu_x86_64:ssh_target_key",
+        "@score_os_images//ubuntu_x86_64:image",
+        "@score_os_images//ubuntu_x86_64:qemu_config",
+        "@score_os_images//ubuntu_x86_64:ssh_target_key",
     ],
     plugins = ["@score_itf//score/itf/plugins:qemu_plugin"],
 )

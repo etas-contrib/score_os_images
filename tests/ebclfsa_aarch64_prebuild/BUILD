@@ -11,9 +11,9 @@
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
 
-load("@os_images//ebclfsa_aarch64_prebuild:defs.bzl", "ebclfsa_aarch64_prebuild")
 load("@rules_python//python:defs.bzl", "py_test")
 load("@score_itf//:defs.bzl", "py_itf_test")
+load("@score_os_images//ebclfsa_aarch64_prebuild:defs.bzl", "ebclfsa_aarch64_prebuild")
 
 py_test(
     name = "release_archive_test",
@@ -24,7 +24,7 @@ py_test(
 )
 
 ebclfsa_aarch64_prebuild(
-    base_image = "@os_images_release_archive//file",
+    base_image = "@score_os_images_release_archive//file",
 )
 
 py_test(
@@ -36,7 +36,7 @@ py_test(
         "$(location :kernel)",
         "$(location :ssh_target_key)",
         "$(location :qemu_config)",
-        "$(location @os_images_release_archive//file)",
+        "$(location @score_os_images_release_archive//file)",
     ],
     data = [
         ":image",
@@ -44,7 +44,7 @@ py_test(
         ":qemu_config",
         ":ssh_target_key",
         ":vanilla-image",
-        "@os_images_release_archive//file",
+        "@score_os_images_release_archive//file",
     ],
     main = "test_release_macro_empty.py",
     tags = ["qemu-integration"],
