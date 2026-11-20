@@ -170,7 +170,7 @@ for artifact in "${artifacts[@]}"; do
 done
 
 if [[ "$release" == true ]]; then
-    # Publish only the development login key, never SSH server host keys.
+    # The disk image contains development SSH server host keys.
     tar --sparse -czf "$output/$image.tar.gz" -C "$deploy" \
         "$image.wic" "$image-vmlinux" "$image.spdx.json" "$image-ssh-target-key"
     cp -L "$deploy/$sdk.tar.gz" "$deploy/$sdk.spdx.json" "$output/"

@@ -141,6 +141,7 @@ py_itf_test(
 py_itf_test(
     name = "ebclfsa_qemu_test",
     srcs = [
+        "test_ebclfsa_ssh_host_keys.py",
         "test_multicast.py",
         "test_no_disk.py",
         "test_ping.py",
@@ -155,6 +156,7 @@ py_itf_test(
         "//ebclfsa_aarch64:image",
         "//ebclfsa_aarch64:kernel",
         "//ebclfsa_aarch64:qemu_config",
+        "//ebclfsa_aarch64:ssh_host_public_keys",
         "//ebclfsa_aarch64:ssh_target_key",
     ],
     plugins = ["@score_itf//score/itf/plugins:qemu_plugin"],

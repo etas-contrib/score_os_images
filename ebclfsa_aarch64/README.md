@@ -38,10 +38,12 @@ only built when selected explicitly.
 | `:qemu_config` | Generated QEMU configuration with the image's SSH key path |
 | `:ssh_target_key` | Development private key generated with the image |
 | `:network_config_deb` | The `score-network-config` Debian package |
+| `:ssh_host_keys_deb` | Generated SSH server host keys as a Debian package |
 
 ## Requirements
 
-- An x86_64 Linux host with Docker, `dpkg-deb` (from `dpkg`), and permission to
+- An x86_64 Linux host with Docker, `dpkg-deb` (from `dpkg`), `ssh-keygen`
+  (from `openssh-client`), and permission to
   run privileged containers. The Docker daemon must see the Bazel output
   directory at the same absolute path as the build process (no remote daemon).
 - Network access to GitHub, GHCR and the package repositories referenced by the
@@ -84,6 +86,14 @@ from the Debian control metadata, to `IMAGE_INSTALL`. Duplicate package names ar
 rejected. Packages must be compatible with the arm64 image, and their
 dependencies must be available from the configured repositories or supplied in
 the same list.
+
+The `score-itf-ssh-host-keys` package supplies RSA, ECDSA and Ed25519 host
+key pairs at build time, replacing the toolkit's empty private-key placeholders.
+This avoids generating them at boot. Images built from the same package share
+these keys; Bazel may reuse the package across builds. The private keys are
+present in the disk image and build outputs, so they are not secret and must
+not be trusted for host authentication. Use these images only for isolated
+testing. Generate unique host keys for each device before any non-test use.
 
 ## Tests
 
@@ -142,7 +152,7 @@ These keys are deliberately public development credentials: anyone downloading
 the release can log in as root on a reachable image. Use only on isolated test
 networks, never reuse the keys elsewhere, and replace the authorized key and
 disable passwordless login before any non-test deployment. SSH server host
-private keys are not included in the archives.
+private keys are included in the disk image inside each archive.
 
 Both platform builds must succeed before any assets are published. Re-running a
 successful workflow replaces assets with the same names. If releases are created

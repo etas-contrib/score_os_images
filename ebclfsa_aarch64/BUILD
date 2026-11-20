@@ -20,6 +20,13 @@ load("//:qemu_config.bzl", "qemu_config")
 IMAGE_PACKAGES = [
     ":network_config_deb",
     ":sshd_config_deb",
+    ":ssh_host_keys_deb",
+]
+
+SSH_HOST_KEY_ALGORITHMS = [
+    "rsa",
+    "ecdsa",
+    "ed25519",
 ]
 
 exports_files(
@@ -77,6 +84,83 @@ pkg_deb(
     homepage = "https://github.com/eclipse-score/os_images",
     maintainer = "Eclipse S-CORE contributors <score-dev@eclipse.org>",
     package = "score-itf-sshd-config",
+    version = "1.0",
+    visibility = ["//visibility:public"],
+)
+
+# The toolkit's first-boot key generator skips keys whose public files exist.
+genrule(
+    name = "ssh_host_keys",
+    outs = [
+        "ssh-host-keys/ssh_host_%s_key%s" % (algorithm, suffix)
+        for algorithm in SSH_HOST_KEY_ALGORITHMS
+        for suffix in [
+            "",
+            ".pub",
+        ]
+    ],
+    cmd = "mkdir -p $(RULEDIR)/ssh-host-keys && " +
+          " && ".join([
+              "ssh-keygen -q -t %s -N '' -C '' -f $(RULEDIR)/ssh-host-keys/ssh_host_%s_key" % (algorithm, algorithm)
+              for algorithm in SSH_HOST_KEY_ALGORITHMS
+          ]),
+    local = True,
+    tags = ["no-remote-cache"],
+)
+
+filegroup(
+    name = "ssh_host_public_keys",
+    srcs = [
+        "ssh-host-keys/ssh_host_%s_key.pub" % algorithm
+        for algorithm in SSH_HOST_KEY_ALGORITHMS
+    ],
+    visibility = ["//visibility:public"],
+)
+
+pkg_tar(
+    name = "ssh_host_private_keys_tar",
+    srcs = [
+        "ssh-host-keys/ssh_host_%s_key" % algorithm
+        for algorithm in SSH_HOST_KEY_ALGORITHMS
+    ],
+    mode = "0600",
+    package_dir = "/etc/ssh",
+    strip_prefix = "ssh-host-keys",
+    tags = ["no-remote-cache"],
+)
+
+pkg_tar(
+    name = "ssh_host_public_keys_tar",
+    srcs = [
+        "ssh-host-keys/ssh_host_%s_key.pub" % algorithm
+        for algorithm in SSH_HOST_KEY_ALGORITHMS
+    ],
+    mode = "0644",
+    package_dir = "/etc/ssh",
+    strip_prefix = "ssh-host-keys",
+    tags = ["no-remote-cache"],
+)
+
+pkg_tar(
+    name = "ssh_host_keys_tar",
+    tags = ["no-remote-cache"],
+    deps = [
+        ":ssh_host_private_keys_tar",
+        ":ssh_host_public_keys_tar",
+    ],
+)
+
+pkg_deb(
+    name = "ssh_host_keys_deb",
+    architecture = "all",
+    data = ":ssh_host_keys_tar",
+    depends = ["ebclfsa-openssh-server-keys-crinit"],
+    description = "Development SSH server host keys for integration testing",
+    homepage = "https://github.com/eclipse-score/os_images",
+    maintainer = "Eclipse S-CORE contributors <score-dev@eclipse.org>",
+    package = "score-itf-ssh-host-keys",
+    replaces = ["ebclfsa-openssh-server-keys-crinit"],
+    tags = ["no-remote-cache"],
     version = "1.0",
     visibility = ["//visibility:public"],
 )
