@@ -10,7 +10,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
-name: PR
+name: Tests
 on:
   pull_request:
     types: [opened, reopened, synchronize]
@@ -18,6 +18,8 @@ on:
     types: [checks_requested]
 jobs:
   common:
-    uses: eclipse-score/cicd-workflows/.github/workflows/tests.yml@8d80e8df150cae21d53cbc8031d0f970648f7a67 # v0.0.3
+    uses: eclipse-score/cicd-workflows/.github/workflows/bazel.yml@200f97be787848974e55d1f4ef5615efbaa97ff8 # bazel/v0.0.0
+    with:
+      test-targets: //...
     permissions:
       contents: read
