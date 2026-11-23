@@ -42,7 +42,7 @@ bazel_dep(name = "rules_python", version = "1.9.0", dev_dependency = True)
 
 # Filesystem image rules, used to build the additional disk image attached to the
 # QEMU targets via `--qemu-disk`.
-bazel_dep(name = "score_rules_imagefs", version = "0.1.0", dev_dependency = True)
+bazel_dep(name = "score_rules_imagefs", version = "0.2.0", dev_dependency = True)
 
 imagefs = use_extension("@score_rules_imagefs//extensions:imagefs.bzl", "imagefs", dev_dependency = True)
 imagefs.toolchain(
