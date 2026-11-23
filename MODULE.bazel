@@ -70,8 +70,8 @@ http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_
 http_file(
     name = "score_os_images_release_archive",
     downloaded_file_path = "score-image-trixie-ebclfsa-ebcl-qemuarm64.tar.gz",
-    sha256 = "c85d1c01ad1f148a59489dd779792bf89e6b98a1677f9b1210cabd0cae44fe74",
-    urls = ["https://github.com/eclipse-score/os_images/releases/download/v0.0.2/score-image-trixie-ebclfsa-ebcl-qemuarm64.tar.gz"],
+    sha256 = "c0dcfbe2e22756fc9b9763e2c180306925e327c3b2b8442aa9196712e5767b72",
+    urls = ["https://github.com/eclipse-score/os_images/releases/download/v0.0.5/score-image-trixie-ebclfsa-ebcl-qemuarm64.tar.gz"],
 )
 
 ###############################################################################
