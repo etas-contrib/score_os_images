@@ -1,0 +1,47 @@
+# *******************************************************************************
+# Copyright (c) 2026 Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+# *******************************************************************************
+module(name = "score_os_images_autosd_example")
+
+bazel_dep(name = "rules_cc", version = "0.2.18")
+bazel_dep(name = "rules_pkg", version = "1.2.0")
+
+# Consume this repository as an external module. A real project would pin a
+# released version instead of overriding it with a local path.
+bazel_dep(name = "score_os_images")
+
+# Overrides only apply in the root module, so mirror the one of score_os_images.
+bazel_dep(name = "rules_oci", version = "2.3.1")
+git_override(
+    module_name = "rules_oci",
+    commit = "f214185dcf149090cb3212e878f692eb2c8c0d3d",  # v2.3.1
+    remote = "https://github.com/bazel-contrib/rules_oci.git",
+)
+
+# Test dependencies
+bazel_dep(name = "platforms", version = "1.1.0", dev_dependency = True)
+bazel_dep(name = "rules_python", version = "1.9.0", dev_dependency = True)
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python", dev_dependency = True)
+python.defaults(python_version = "3.12")
+python.toolchain(
+    is_default = True,
+    python_version = "3.12",
+)
+
+# QEMU integration test framework, same checkout as used by score_os_images
+bazel_dep(name = "score_itf", version = "0.7.0", dev_dependency = True)
+git_override(
+    module_name = "score_itf",
+    commit = "501c396a7ae5ab1fed0aceb20cb53a4360f16e0a",
+    remote = "https://github.com/eclipse-score/itf.git",
+)

@@ -24,12 +24,7 @@ copyright_checker(
     srcs = [
         "BUILD",
         "MODULE.bazel",
-        "autosd",
-        "ebclfsa_aarch64",
-        "ebclfsa_aarch64_prebuild",
-        "qemu_config.bzl",
-        "tests",
-        "ubuntu_x86_64",
+        "score",
     ],
     config = "@score_tooling//cr_checker/resources:config",
     template = "@score_tooling//cr_checker/resources:templates",

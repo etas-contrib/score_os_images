@@ -28,7 +28,7 @@ jobs:
       - name: Install qemu
         run: |
           sudo apt-get update
-          sudo apt-get install -y qemu-system-arm qemu-system-x86 cloud-image-utils
+          sudo apt-get install -y qemu-system-arm qemu-system-x86 cloud-image-utils ovmf
       - name: Enable KVM group perms
         run: |
           sudo chmod 666 /dev/kvm
@@ -37,4 +37,6 @@ jobs:
           sudo sysctl kernel.apparmor_restrict_unprivileged_userns=0
       - name: Run Linux QEMU integration tests
         run: |
-          bazel test //tests/... --config=qemu-integration
+          bazel test //score/tests/... --config=qemu-integration \
+            --//score/common/qemu:uefi_code=/usr/share/OVMF/OVMF_CODE_4M.fd \
+            --//score/common/qemu:uefi_vars=/usr/share/OVMF/OVMF_VARS_4M.fd

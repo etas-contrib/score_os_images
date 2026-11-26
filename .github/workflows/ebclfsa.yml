@@ -15,8 +15,8 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
     paths:
-      - ebclfsa_aarch64/**
-      - tests/**
+      - score/os/ebclfsa_aarch64/**
+      - score/tests/**
       - MODULE.bazel
       - .github/workflows/ebclfsa.yml
   workflow_dispatch:
@@ -49,7 +49,7 @@ jobs:
           sudo sysctl kernel.apparmor_restrict_unprivileged_userns=0
       - name: Build EBcLfSA image from scratch
         run: |
-          bazel build //ebclfsa_aarch64:image //ebclfsa_aarch64:kernel
+          bazel build //score/os/ebclfsa_aarch64:image //score/os/ebclfsa_aarch64:kernel
       - name: Run QEMU integration tests
         run: |
-          bazel test --config=qemu-integration //tests:ebclfsa_aarch64_qemu_tests
+          bazel test --config=qemu-integration //score/tests:ebclfsa_aarch64_qemu_tests

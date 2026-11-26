@@ -1,0 +1,2 @@
+# Examples are standalone Bazel modules consuming score_os_images
+examples

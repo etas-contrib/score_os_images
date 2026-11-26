@@ -1,4 +1,4 @@
-# os_images
+# OS Images
 
 OS Images for testing and deliveries
 
@@ -6,8 +6,12 @@ OS Images for testing and deliveries
 
 - [AutoSD](./autosd/README.md): AutoSD based image built with Automotive Image Builder.
 - [QEMU images](./QEMU_IMAGES.md): Ubuntu x86_64 and EBcLfSA aarch64 images for integration testing.
-- [EBcLfSA release images and SDKs](./ebclfsa_aarch64/README.md#release-images-and-sdks):
+- [EBcLfSA release images and SDKs](./score/os/ebclfsa_aarch64/README.md#release-images-and-sdks):
   QEMU aarch64 and Raspberry Pi 4B assets built automatically for published releases.
+
+## Examples
+
+See the [examples folder](./examples) for practical examples about how use this repository with a Bazel module.
 
 ## License
 

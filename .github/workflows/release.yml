@@ -41,18 +41,18 @@ jobs:
       - name: Setup Bazel
         uses: bazel-contrib/setup-bazel@0.19.2
       - name: Test image build script
-        run: bash ebclfsa_aarch64/build_image_test.sh
+        run: bash score/os/ebclfsa_aarch64/build_image_test.sh
       - name: Allow unprivileged user namespaces
         run: sudo sysctl kernel.apparmor_restrict_unprivileged_userns=0
       - name: Build image and matching SDK
         env:
           MACHINE: ${{ matrix.machine }}
-        run: bazel build "//ebclfsa_aarch64:release-$MACHINE"
+        run: bazel build "//score/os/ebclfsa_aarch64:release-$MACHINE"
       - name: Upload release artifacts
         uses: actions/upload-artifact@v7
         with:
           name: ebclfsa-release-${{ matrix.machine }}
-          path: bazel-bin/ebclfsa_aarch64/release/${{ matrix.machine }}/*
+          path: bazel-bin/score/os/ebclfsa_aarch64/release/${{ matrix.machine }}/*
           if-no-files-found: error
           compression-level: 0
   publish:

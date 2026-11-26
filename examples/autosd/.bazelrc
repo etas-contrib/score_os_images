@@ -1,0 +1,12 @@
+common --registry=https://raw.githubusercontent.com/eclipse-score/bazel_registry/main/
+common --registry=https://bcr.bazel.build
+
+# Keep the QEMU tests out of the default build; they need KVM and QEMU.
+build --build_tag_filters=-qemu-integration
+test --test_tag_filters=-qemu-integration
+test --test_output=errors
+
+# Opt in to QEMU boot tests
+build:qemu-integration --build_tag_filters=qemu-integration
+test:qemu-integration --test_tag_filters=qemu-integration
+test:qemu-integration --run_under=@score_itf//scripts:run_under_qemu

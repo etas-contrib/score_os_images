@@ -1,0 +1,12 @@
+[Unit]
+Description=Enable multicast and add 224.0.0.0/4 route
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/enable-multicast.sh
+
+[Install]
+WantedBy=multi-user.target

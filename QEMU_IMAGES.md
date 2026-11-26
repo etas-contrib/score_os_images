@@ -7,11 +7,14 @@ can depend on them directly.
 
 ## Images
 
+OS targets are located in `score/os/$os_name`.
+
 | OS name | Base | Architecture |
 | --- | --- | --- |
 | `ubuntu_x86_64` | Ubuntu 24.04 minimal cloud image | x86_64 |
 | `ebclfsa_aarch64` | EB corbos Linux for Safety Applications built from the toolkit's packages | aarch64 |
 | `ebclfsa_aarch64_prebuild` | Makro for downloading and customizing the prebuilt EBcLfSA image | aarch64 |
+| `autosd` | AutoSD Bootc pre-built images  | aarch64, x86_64 |
 
 All images expose `:image`, `:ssh_target_key` and `:qemu_config`.
 Both EBcLfSA variants additionally expose `:kernel`.
@@ -23,8 +26,6 @@ Both EBcLfSA variants additionally expose `:kernel`.
 | `:kernel` | The kernel for the EBcLfSA images |
 | `:qemu_config` | `qemu_config.json` describing how to run the image, preconfigured with the SSH key path |
 
-`ebclfsa_aarch64_prebuild()` additionally exposes `:vanilla-image`, the
-unmodified base disk image.
 
 The generated `:qemu_config` sets
 ITF's native `ssh_auth.pkey_path` to the key's runfiles path. Include the key
@@ -32,17 +33,28 @@ in the test's `data` alongside the image and configuration:
 
 ```starlark
 args = [
-    "--qemu-config=$(location //<os_name>:qemu_config)",
-    "--qemu-kernel=$(location //<os_name>:kernel)",
-    "--qemu-rootfs=$(location //<os_name>:image)",
+    "--qemu-config=$(location //score/os/<os_name>:qemu_config)",
+    "--qemu-kernel=$(location //score/os/<os_name>:kernel)",
+    "--qemu-rootfs=$(location //score/os/<os_name>:image)",
 ]
 data = [
-    "//<os_name>:image",
-    "//<os_name>:kernel",
-    "//<os_name>:qemu_config",
-    "//<os_name>:ssh_target_key",
+    "//score/os/<os_name>:image",
+    "//score/os/<os_name>:kernel",
+    "//score/os/<os_name>:qemu_config",
+    "//score/os/<os_name>:ssh_target_key",
 ]
 ```
+
+### ebclfsa_aarch64_prebuild
+
+`ebclfsa_aarch64_prebuild()` additionally exposes `:vanilla-image`, the
+unmodified base disk image.
+
+### autosd
+
+* Additional `image_bootc` target for Bootc OCI Images (for container testing and QEMU image customization)
+* SSH uses `root` / `password` for authentication (default for development images)
+* AutoSD needs UEFI in other to boot
 
 ## Networking
 
@@ -57,16 +69,16 @@ available for the ITF tap network.
 Images mount an additional and optional disk automatically on `/opt`. The ITF QEMU
 plugin attaches such a disk when it is passed via `--qemu-disk`.
 
-`//tests:qemu_disk_image` builds an example ext4 disk with
+`//score/tests:qemu_disk_image` builds an example ext4 disk with
 [rules_imagefs](https://github.com/eclipse-score/rules_imagefs):
 
 ```starlark
 py_itf_test(
     name = "my_test",
     args = [
-        "--qemu-config=$(location //<os_name>:qemu_config)",
-        "--qemu-disk=$(location //tests:qemu_disk_image)",
-        "--qemu-rootfs=$(location //<os_name>:image)",
+        "--qemu-config=$(location //score/os/<os_name>:qemu_config)",
+        "--qemu-disk=$(location //score/tests:qemu_disk_image)",
+        "--qemu-rootfs=$(location //score/os/<os_name>:image)",
     ],
     ...
 )
@@ -80,7 +92,7 @@ It must never be used in production.
 Login into a running image using the development SSH key:
 
 ```console
-$ ssh -i  $(bazel cquery --output=files //<os_name>:ssh_target_key) \
+$ ssh -i  $(bazel cquery --output=files //score/os/<os_name>:ssh_target_key) \
   root@169.254.158.190
 ```
 
@@ -128,7 +140,7 @@ http_file(
 Instantiate the macro in a consumer package, for example `qemu/BUILD.bazel`:
 
 ```starlark
-load("@score_os_images//ebclfsa_aarch64_prebuild:defs.bzl", "ebclfsa_aarch64_prebuild")
+load("@score_os_images//score/os/ebclfsa_aarch64_prebuild:defs.bzl", "ebclfsa_aarch64_prebuild")
 
 ebclfsa_aarch64_prebuild(
     base_image = "@ebclfsa_release_archive//file",
@@ -168,10 +180,10 @@ py_itf_test(
 )
 ```
 
-Alternatively, use `@score_os_images//ebclfsa_aarch64:image`,
-`@score_os_images//ebclfsa_aarch64:kernel`, `@score_os_images//ebclfsa_aarch64:qemu_config`,
-and `@score_os_images//ebclfsa_aarch64:ssh_target_key` to build the EBcLfSA image
-from scratch; see the [build requirements](./ebclfsa_aarch64/README.md#requirements).
+Alternatively, use `@score_os_images//score/os/ebclfsa_aarch64:image`,
+`@score_os_images//score/os/ebclfsa_aarch64:kernel`, `@score_os_images//score/os/ebclfsa_aarch64:qemu_config`,
+and `@score_os_images//score/os/ebclfsa_aarch64:ssh_target_key` to build the EBcLfSA image
+from scratch; see the [build requirements](./score/os/ebclfsa_aarch64/README.md#requirements).
 
 ### Ubuntu x86_64
 
@@ -187,13 +199,13 @@ py_itf_test(
     name = "ubuntu_test",
     srcs = ["test_example.py"],
     args = [
-        "--qemu-config=$(location @score_os_images//ubuntu_x86_64:qemu_config)",
-        "--qemu-rootfs=$(location @score_os_images//ubuntu_x86_64:image)",
+        "--qemu-config=$(location @score_os_images//score/os/ubuntu_x86_64:qemu_config)",
+        "--qemu-rootfs=$(location @score_os_images//score/os/ubuntu_x86_64:image)",
     ],
     data = [
-        "@score_os_images//ubuntu_x86_64:image",
-        "@score_os_images//ubuntu_x86_64:qemu_config",
-        "@score_os_images//ubuntu_x86_64:ssh_target_key",
+        "@score_os_images//score/os/ubuntu_x86_64:image",
+        "@score_os_images//score/os/ubuntu_x86_64:qemu_config",
+        "@score_os_images//score/os/ubuntu_x86_64:ssh_target_key",
     ],
     plugins = ["@score_itf//score/itf/plugins:qemu_plugin"],
 )
@@ -215,7 +227,7 @@ $ bazel test --run_under=@score_itf//scripts:run_under_qemu //tests:ubuntu_test
 ```console
 $ sudo apt-get install -y cloud-image-utils qemu-system-arm \
       qemu-system-x86 qemu-utils openssh-client
-$ bazel build //<os_name>:image
+$ bazel build //score/os/<os_name>:image
 ```
 
 Building the images requires KVM or falls back to slow TCG emulation.
@@ -225,7 +237,7 @@ Building the images requires KVM or falls back to slow TCG emulation.
 Run the image boot, DHCP, and bidirectional ping tests with:
 
 ```console
-$ bazel test --config=qemu-integration //tests/...
+$ bazel test --config=qemu-integration //score/tests/...
 ```
 
 ## Security note

@@ -1,0 +1,32 @@
+# *******************************************************************************
+# Copyright (c) 2026 Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+# *******************************************************************************
+
+load(":qemu_config.bzl", "uefi_path")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["qemu_config.bzl"])
+
+# Host paths to the UEFI firmware substituted into QEMU config templates.
+# No default; set them on the command line, e.g. on Ubuntu 24.04 (ovmf package)
+# --//score/common/qemu:uefi_code=/usr/share/OVMF/OVMF_CODE_4M.fd
+# --//score/common/qemu:uefi_vars=/usr/share/OVMF/OVMF_VARS_4M.fd
+uefi_path(
+    name = "uefi_code",
+    build_setting_default = "",
+)
+
+uefi_path(
+    name = "uefi_vars",
+    build_setting_default = "",
+)

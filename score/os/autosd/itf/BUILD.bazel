@@ -1,0 +1,28 @@
+# *******************************************************************************
+# Copyright (c) 2026 Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+# *******************************************************************************
+
+load("//score/common/qemu:qemu_config.bzl", "qemu_config")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "qemu_config_aarch64.json",
+])
+
+qemu_config(
+    name = "qemu_config_x86_64",
+    out = "qemu_config_x86_64.json",
+    template = "qemu_config_x86_64.template.json",
+    uefi_code = "//score/common/qemu:uefi_code",
+    uefi_vars = "//score/common/qemu:uefi_vars",
+)

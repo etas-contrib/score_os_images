@@ -30,15 +30,21 @@ bazel_dep(
     dev_dependency = True,
 )
 
-# Rules used by the QEMU image definitions
-bazel_dep(name = "platforms", version = "1.1.0", dev_dependency = True)
-
+# Rules used by the QEMU image definitions, also needed by consumers of the
+# public targets (selects on @platforms, py_binary tools in score/common)
+bazel_dep(name = "platforms", version = "1.1.0")
 bazel_dep(name = "rules_pkg", version = "1.2.0")
 bazel_dep(name = "rules_shell", version = "0.6.1")
 
 # QEMU integration test framework
 bazel_dep(name = "score_itf", version = "0.7.0", dev_dependency = True)
-bazel_dep(name = "rules_python", version = "1.9.0", dev_dependency = True)
+git_override(
+    module_name = "score_itf",
+    commit = "501c396a7ae5ab1fed0aceb20cb53a4360f16e0a",
+    remote = "https://github.com/eclipse-score/itf.git",
+)
+
+bazel_dep(name = "rules_python", version = "1.9.0")
 
 # Filesystem image rules, used to build the additional disk image attached to the
 # QEMU targets via `--qemu-disk`.
@@ -60,6 +66,16 @@ python.toolchain(
     python_version = "3.12",
 )
 
+# oci tools
+bazel_dep(name = "rules_oci", version = "2.3.1")
+git_override(
+    module_name = "rules_oci",
+    commit = "f214185dcf149090cb3212e878f692eb2c8c0d3d",  # v2.3.1
+    remote = "https://github.com/bazel-contrib/rules_oci.git",
+)
+
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+
 ###############################################################################
 #
 # EBcLfSA release archive used as base for the aarch64 QEMU image
@@ -79,7 +95,7 @@ http_file(
 # EB corbos Toolkit sources used to build the aarch64 image from scratch
 #
 # Only the KAS configuration, the bundled Isar layers and the development
-# container setup are used, see //ebclfsa_aarch64.
+# container setup are used, see //score/os/ebclfsa_aarch64.
 #
 ###############################################################################
 new_git_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
@@ -118,4 +134,66 @@ http_file(
 bazel_dep(
     name = "score_devcontainer",
     version = "1.14.0",
+)
+
+###############################################################################
+#
+# AutoSD Defintions
+#
+###############################################################################
+bazel_dep(name = "score_os_autosd", version = "0.2.0")
+
+http_file(
+    name = "eclipse_autosd10_qemu_x86_64",
+    downloaded_file_path = "eclipse-autosd-bootc-qemu-x86_64.qcow2.xz",
+    sha256 = "ebf8c0316a573d3aaba6730043aeb800d4bf550aa06f5ce2dd8220277b933cfa",
+    url = "https://download.eclipse.org/autosd/disk-images/eclipse-autosd-bootc-qemu-x86_64.qcow2.xz",
+)
+
+http_file(
+    name = "eclipse_autosd10_qemu_aarch64",
+    downloaded_file_path = "eclipse-autosd-bootc-qemu-aarch64.qcow2.xz",
+    sha256 = "9becce2585d96906727c1d446e44250042b964836d1ae929ed8cb9ce916d3fbc",
+    url = "https://download.eclipse.org/autosd/disk-images/eclipse-autosd-bootc-qemu-aarch64.qcow2.xz",
+)
+
+oci.pull(
+    name = "eclipse_autosd10_qemu",
+    digest = "sha256:91560c5c7e80b00347ad0ce8de0ec38c3682b989d3ca2bc63cb35976cb518c5c",
+    image = "ghcr.io/eclipse-autosd/eclipse-autosd-bootc-qemu",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64",
+    ],
+    tag = "latest",
+)
+use_repo(
+    oci,
+    "eclipse_autosd10_qemu",
+    "eclipse_autosd10_qemu_linux_amd64",
+    "eclipse_autosd10_qemu_linux_arm64",
+)
+
+autosd_rpm = use_repo_rule("@score_os_autosd//rules/autosd_dep:defs.bzl", "autosd_rpm")
+
+autosd_rpm(
+    name = "autosd_itf_rpms_x86_64",
+    arch = "x86_64",
+    build = "//score/os/autosd/pkg:itf.BUILD.bazel",
+    packages = [
+        "iproute",
+        "iputils",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+autosd_rpm(
+    name = "autosd_itf_rpms_aarch64",
+    arch = "aarch64",
+    build = "//score/os/autosd/pkg:itf.BUILD.bazel",
+    packages = [
+        "iproute",
+        "iputils",
+    ],
+    visibility = ["//visibility:public"],
 )
