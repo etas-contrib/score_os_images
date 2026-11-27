@@ -36,6 +36,7 @@
 bazel-*
 MODULE.bazel.lock
 user.bazelrc
+devcontainer.bazelrc
 
 # Ruff
 .ruff_cache

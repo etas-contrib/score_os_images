@@ -20,3 +20,4 @@ common --extra_toolchains=@score_linux_x86_64_ext4_toolchain//:ext4-x86_64-linux
 
 # Local, untracked overrides (e.g. UEFI firmware paths).
 try-import %workspace%/user.bazelrc
+try-import %workspace%/devcontainer.bazelrc

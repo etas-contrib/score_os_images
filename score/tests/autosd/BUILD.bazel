@@ -10,16 +10,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
-load("@rules_python//python:defs.bzl", "py_test")
-load("@score_itf//:defs.bzl", "py_itf_test")
 
-test_suite(
-    name = "qemu_tests",
-    tags = ["manual"],
-    tests = [
-        ":autosd_qemu_tests",
-    ],
-)
+load("@score_itf//:defs.bzl", "py_itf_test")
 
 py_itf_test(
     name = "autosd_qemu_tests",

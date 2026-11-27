@@ -11,6 +11,9 @@
         "ghcr.io/devcontainers/features/docker-in-docker": {}
     },
     "postStartCommand": "sudo chmod 666 /dev/kvm",
+    "postCreateCommand": {
+        "Setup OVMF": "echo -e '# Needed by //score/tests/autosd:autosd_qemu_tests\nbuild:qemu-integration --//score/common/qemu:uefi_code=/usr/share/OVMF/OVMF_CODE_4M.fd\nbuild:qemu-integration --//score/common/qemu:uefi_vars=/usr/share/OVMF/OVMF_VARS_4M.fd' > devcontainer.bazelrc "
+    },
     "customizations": {
         "vscode": {
             "extensions": [
