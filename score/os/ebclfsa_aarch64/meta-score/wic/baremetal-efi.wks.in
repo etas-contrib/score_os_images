@@ -1,0 +1,5 @@
+bootloader --ptable gpt --timeout 3 --append "console=tty1 console=${MACHINE_SERIAL},${BAUDRATE_TTY} rw rootfstype=ext4 fsck.repair=yes rootwait earlycon=uart8250,mmio32,0xfe215040 init=/usr/bin/ebclfsa-cflinit sdk_enable lisa_syscall_whitelist=2026 sharedmem.enable_sharedmem=0"
+
+part /boot --source bootimg-efi-isar --sourceparams "loader=systemd-boot,title=FastDev,extraargs=-F 32 -S 512" --fstype=vfat --label boot --part-type EF00 --align 4096 --size 256M
+part / --source rootfs --use-uuid --fstype=ext4 --label root --align 4096 --size ${EBCLFSA_FASTDEV_ROOTFS_PARTITION_SIZE_MB}M --exclude-path boot/
+part /data --fstype=ext4 --label data --align 4096 --size ${EBCLFSA_FASTDEV_DATA_PARTITION_SIZE_MB}M

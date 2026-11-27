@@ -132,8 +132,10 @@ following the upstream toolkit's archive layout:
 - `score-image-sdk-trixie-ebclfsa-<machine>.spdx.json`: SDK SPDX metadata.
 - `score-image-trixie-ebclfsa-<machine>.sha256`: checksums of the three assets.
 
-The Raspberry Pi build uses the toolkit's Raspberry Pi BSP, boot files and
-fstab configuration; the additional `/opt` disk mount is QEMU-only. Both images
+The Raspberry Pi build uses the toolkit's Raspberry Pi BSP and fstab configuration,
+but expects an already provisioned AArch64 EBBR firmware platform and uses a
+systemd-boot EFI partition. The QEMU build retains the toolkit's bare-metal disk
+layout; the additional `/opt` disk mount is QEMU-only. Both images
 retain the S-CORE network configuration and passwordless root SSH login described
 above and are **for integration testing, not production**.
 

@@ -23,7 +23,7 @@
 # SOFTWARE.
 
 SUMMARY = "Eclipse S-CORE EBcLfSA image"
-LICENSE = "CLOSED"
+LICENSE = "Apache-2.0"
 
 inherit ebclfsa_image
 
@@ -41,12 +41,18 @@ EBCLFSA_FASTDEV_SERIAL_CONFIG ?= "ebclfsa-fastdev-crinit-getty"
 
 IMAGE_FSTYPES = "wic"
 WKS_FILE = "baremetal-${MACHINE}.wks.in"
+WKS_FILE:rpi4b = "baremetal-efi.wks.in"
 
 KERNEL_IMAGE_PKG = "${EBCLFSA_FASTDEV_KERNEL_PKG}"
 
 COMPATIBLE_MACHINE = "${EBCLFSA_FASTDEV_COMPATIBLE_MACHINE}"
 
 EBCL_BOOTLOADER = "1"
+# The Raspberry Pi EBBR platform provides firmware and the hardware description.
+EBCL_BOOTLOADER:rpi4b = "0"
+EBCL_COPY_DEVICE_TREE:rpi4b = "0"
+IMAGE_BOOT_FILES:rpi4b = ""
+IMAGE_EFI_BOOT_FILES:rpi4b = ""
 
 require recipes-images/common/ebclfsa-common.inc
 
@@ -85,6 +91,9 @@ UNWANTED_PKGS = " \
 
 # Do not update fstab when creating wic images
 WIC_CREATE_EXTRA_ARGS:append = " --no-fstab-update"
+
+IMAGER_INSTALL:append:rpi4b = " ${SYSTEMD_BOOTLOADER_INSTALL}"
+IMAGER_BOM:append:rpi4b = " ${SYSTEMD_BOOTLOADER_INSTALL}"
 
 # Generate a development key using the toolkit's SSH target access support.
 EBCL_SSH_TARGET_ACCESS = "1"
