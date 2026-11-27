@@ -1,0 +1,75 @@
+# *******************************************************************************
+# Copyright (c) 2026 Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+# *******************************************************************************
+name: "U-Boot Images: Build and Verify"
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    paths:
+      - score/boot/**
+      - score/common/boot_disk/**
+      - score/platforms/**
+      - MODULE.bazel
+      - .github/workflows/uboot_images.yml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  build:
+    name: ${{ matrix.platform }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [rpi4]
+        include:
+          - platform: rpi4
+            image: rpi4-boot.img
+            label: dos
+            files: config.txt start4.elf fixup4.dat bcm2711-rpi-4-b.dtb u-boot.bin
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      - name: Setup Bazel
+        uses: bazel-contrib/setup-bazel@0.19.2
+      - name: Install image tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mtools fdisk binutils
+      - name: Build image
+        run: |
+          bazel build //score/platforms/${{ matrix.platform }}:image
+      - name: Verify partition table and files
+        env:
+          IMAGE: bazel-bin/score/platforms/${{ matrix.platform }}/${{ matrix.image }}
+          LABEL: ${{ matrix.label }}
+          FILES: ${{ matrix.files }}
+        run: |
+          set -euo pipefail
+          table=$(sfdisk -d "$IMAGE")
+          echo "$table"
+
+          grep -Fq "label: $LABEL" <<<"$table" || { echo "::error::expected partition table '$LABEL'"; exit 1; }
+          [[ $(grep -c ' : start=' <<<"$table") -eq 1 ]] || { echo "::error::expected exactly one partition"; exit 1; }
+
+          start=$(sed -n 's|.* : start= *\([0-9]*\).*|\1|p' <<<"$table")
+          fat="$IMAGE@@$((start * 512))"
+          mdir -i "$fat" ::
+
+          out=$(mktemp -d)
+          for f in $FILES; do
+            mcopy -i "$fat" "::$f" "$out/$f" || { echo "::error::'$f' missing from boot partition"; exit 1; }
+            [[ -s "$out/$f" ]] || { echo "::error::'$f' is empty"; exit 1; }
+          done
+          echo "All expected files present: $FILES"

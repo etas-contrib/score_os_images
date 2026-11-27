@@ -1,0 +1,60 @@
+# *******************************************************************************
+# Copyright (c) 2026 Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+# *******************************************************************************
+#
+# Raspberry Pi 4 "boot shim" SD card image.
+#
+# The resulting raw disk image only carries the Pi4 GPU firmware, the device
+# tree and U-Boot. U-Boot provides a UEFI (EBBR) environment and boots the
+# actual OS from a separate USB stick. See README.md.
+
+load("//score/boot/uboot:uboot.bzl", "uboot_boot_files")
+load("//score/common/boot_disk:defs.bzl", "boot_disk")
+
+exports_files(
+    ["config.txt"],
+    visibility = ["//visibility:public"],
+)
+
+# Raspberry Pi 4 GPU firmware and device tree, downloaded from
+# raspberrypi/firmware (see MODULE.bazel). Lands in the partition root.
+filegroup(
+    name = "firmware",
+    srcs = [
+        "@rpi4_fw_bcm2711_rpi_4_b_dtb//file",
+        "@rpi4_fw_fixup4_dat//file",
+        "@rpi4_fw_start4_elf//file",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# U-Boot as u-boot.bin, which config.txt chainloads via `kernel=`.
+uboot_boot_files(
+    name = "uboot",
+    binary = "//score/boot/third_party/uboot:rpi_arm64",
+    visibility = ["//visibility:public"],
+)
+
+# Built only on request: it depends on downloaded firmware/U-Boot artifacts and
+# host tooling (mtools, util-linux).
+boot_disk(
+    name = "image",
+    srcs = [
+        "config.txt",
+        ":firmware",
+        ":uboot",
+    ],
+    out = "rpi4-boot.img",
+    tags = ["manual"],
+    visibility = ["//visibility:public"],
+    volume_label = "RPI4BOOT",
+)

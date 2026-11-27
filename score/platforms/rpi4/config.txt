@@ -1,0 +1,32 @@
+# *******************************************************************************
+# Copyright (c) 2026 Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+# *******************************************************************************
+#
+# Raspberry Pi 4 firmware configuration.
+#
+# The SD card produced by //score/platforms/rpi4 only carries the Pi4 GPU
+# firmware, the device tree and U-Boot. The GPU firmware loads U-Boot as the
+# "kernel"; U-Boot then provides a UEFI (EBBR) environment and boots the actual
+# OS from the USB stick.
+#
+# https://www.raspberrypi.com/documentation/computers/config_txt.html
+
+# Boot the 64-bit U-Boot / arm64 UEFI.
+arm_64bit=1
+
+# Serial console on the 40-pin header (115200 8n1), useful for bring-up.
+enable_uart=1
+uart_2ndstage=1
+
+# Chainload U-Boot. The GPU firmware passes the firmware-provided device tree
+# (bcm2711-rpi-4-b.dtb) to U-Boot automatically.
+kernel=u-boot.bin

@@ -131,6 +131,40 @@ http_file(
     urls = ["https://cloud-images.ubuntu.com/minimal/releases/noble/release-20261027/ubuntu-24.04-minimal-cloudimg-amd64.img"],
 )
 
+###############################################################################
+#
+# Raspberry Pi 4 boot firmware and U-Boot used by //score/platforms/rpi4
+#
+# The SD card image only carries the Pi4 GPU firmware, the device tree and
+# U-Boot. U-Boot then provides a UEFI (EBBR) environment and boots the actual
+# OS from a separate USB stick.
+#
+# The firmware files are pinned to a single raspberrypi/firmware commit so the
+# download stays reproducible.
+###############################################################################
+RPI_FIRMWARE_COMMIT = "12eeaa12865869b07db760f4bbb7507ec6f1976c"
+
+http_file(
+    name = "rpi4_fw_start4_elf",
+    downloaded_file_path = "start4.elf",
+    sha256 = "3484b5ddc0f655e0e562680b7e2462ec21177763cc2d884b37d31e53b800bb02",
+    urls = ["https://raw.githubusercontent.com/raspberrypi/firmware/%s/boot/start4.elf" % RPI_FIRMWARE_COMMIT],
+)
+
+http_file(
+    name = "rpi4_fw_fixup4_dat",
+    downloaded_file_path = "fixup4.dat",
+    sha256 = "c571fe712649b66409a4834b06af39dcef8dca6727e3abc10c6043f02028b5e5",
+    urls = ["https://raw.githubusercontent.com/raspberrypi/firmware/%s/boot/fixup4.dat" % RPI_FIRMWARE_COMMIT],
+)
+
+http_file(
+    name = "rpi4_fw_bcm2711_rpi_4_b_dtb",
+    downloaded_file_path = "bcm2711-rpi-4-b.dtb",
+    sha256 = "75761b73c284e26623e4d1624bff13e67bce2ae620880efd81d6571a3739fcfb",
+    urls = ["https://raw.githubusercontent.com/raspberrypi/firmware/%s/boot/bcm2711-rpi-4-b.dtb" % RPI_FIRMWARE_COMMIT],
+)
+
 bazel_dep(
     name = "score_devcontainer",
     version = "1.14.0",
@@ -196,4 +230,19 @@ autosd_rpm(
         "iputils",
     ],
     visibility = ["//visibility:public"],
+)
+
+###############################################################################
+#
+# uBoot RPI4 Binary
+#
+###############################################################################
+
+deb = use_repo_rule("//score/boot/third_party:deb.bzl", "deb")
+
+deb(
+    name = "u_boot_rpi_deb",
+    build = "//score/boot/third_party/uboot:uboot.BUILD",
+    sha256 = "ac1325244b9cb4d013555f1f6fdb11e38c28977388f7ccbf3fe4e4c273c2ea72",
+    urls = ["https://ports.ubuntu.com/ubuntu-ports/pool/main/u/u-boot/u-boot-rpi_2025.10-0ubuntu0.24.04.4_arm64.deb"],
 )
